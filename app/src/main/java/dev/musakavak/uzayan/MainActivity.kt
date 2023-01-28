@@ -21,19 +21,19 @@ class MainActivity : ComponentActivity() {
         setContent {
             UzayanTheme {
                 // A surface container using the 'background' color from the theme
-                Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background) {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colors.background
+                ) {
                     Greeting("Android")
                 }
             }
         }
     }
 
-    private fun startForeground(){
-        val thread =  Thread {
-            val intent = Intent(this,UzayanForegroundService::class.java)
-            startForegroundService(intent)
-        }
-        thread.start()
+    private fun startForeground() {
+        val intent = Intent(this, UzayanForegroundService::class.java)
+        startForegroundService(intent)
     }
 }
 

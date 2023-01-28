@@ -3,15 +3,12 @@ package dev.musakavak.uzayan.services
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.os.IBinder
-import dev.musakavak.uzayan.MainActivity
 import dev.musakavak.uzayan.utils.UdpSocket
-import java.net.DatagramSocket
-import java.net.InetAddress
+import kotlinx.coroutines.*
 
 class UzayanForegroundService : Service() {
     private val channelId = "uzayan"
@@ -35,10 +32,15 @@ class UzayanForegroundService : Service() {
     }
 
     override fun onCreate() {
-        UdpSocket.initializeSocket()
-        while (true){
-            UdpSocket.sendMessage("Hello From Android","192.168.1.110")
-            Thread.sleep(10000)
+        CoroutineScope(Dispatchers.IO).launch {
+            UdpSocket.initializeSocket()
+            CoroutineScope(Dispatchers.IO).launch {
+                UdpSocket.listenSocket()
+            }
+            while (true) {
+                UdpSocket.sendMessage("Hello From Android", "192.168.1.110")
+                delay(5000L)
+            }
         }
     }
 }

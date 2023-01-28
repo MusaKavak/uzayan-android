@@ -9,8 +9,8 @@ class UdpSocket {
         private var udpSocket: DatagramSocket? = null
 
         fun initializeSocket() {
-            if(udpSocket == null){
-            udpSocket = DatagramSocket(34724)
+            if (udpSocket == null) {
+                udpSocket = DatagramSocket(34724)
             }
         }
 
@@ -25,7 +25,20 @@ class UdpSocket {
                 )
                 it.send(dp)
             }
+        }
 
+         fun listenSocket(){
+            udpSocket?.let {
+                val packet = DatagramPacket(
+                    ByteArray(1),
+                    1,
+                )
+                it.receive(packet)
+
+                println("Received Packet:                                       ")
+                println(packet)
+                listenSocket()
+            }
         }
 
     }
