@@ -27,6 +27,14 @@
             </intent-filter>
         </activity>
         <service  android:name=".services.UzayanForegroundService"/>
+        <service
+            android:name=".services.NLService"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService"/>
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>
