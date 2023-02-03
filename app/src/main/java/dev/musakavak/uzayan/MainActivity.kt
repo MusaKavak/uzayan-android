@@ -35,17 +35,17 @@ class MainActivity : ComponentActivity() {
         val intent = Intent(this, UzayanForegroundService::class.java)
         startForegroundService(intent)
     }
-}
 
-@Composable
-fun Greeting(name: String) {
-    Text(text = "Hello $name!")
-}
+    @Composable
+    fun Greeting(name: String) {
+        Text(text = "Hello $name!")
+    }
 
-@Preview(showBackground = false)
-@Composable
-fun DefaultPreview() {
-    UzayanTheme {
-        Greeting("Android")
+    @Preview(showBackground = false)
+    @Composable
+    fun DefaultPreview() {
+        UzayanTheme {
+            Greeting("Android")
+        }
     }
 }
