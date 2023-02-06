@@ -4,15 +4,19 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import dev.musakavak.uzayan.managers.UdpSocketManager
 import dev.musakavak.uzayan.services.UzayanForegroundService
 import dev.musakavak.uzayan.ui.theme.UzayanTheme
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -22,11 +26,33 @@ class MainActivity : ComponentActivity() {
             UzayanTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colors.background
+                    modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background
                 ) {
-                    Greeting("Android")
+                    Home()
                 }
+            }
+        }
+    }
+
+    @Composable
+    @Preview
+    fun Home() {
+        val scope = rememberCoroutineScope()
+
+        val sendAddress: MutableState<String> = remember { mutableStateOf("Address") }
+        val message: MutableState<String> = remember { mutableStateOf("Message") }
+
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            TextField(value = sendAddress.value, onValueChange = { sendAddress.value = it })
+            TextField(value = message.value, onValueChange = { message.value = it })
+            Button(onClick = {
+                scope.launch {
+                    withContext(Dispatchers.IO) {
+                        UdpSocketManager.sendMessage(message.value, sendAddress.value)
+                    }
+                }
+            }) {
+                Text(text = "Send")
             }
         }
     }
@@ -36,16 +62,12 @@ class MainActivity : ComponentActivity() {
         startForegroundService(intent)
     }
 
-    @Composable
-    fun Greeting(name: String) {
-        Text(text = "Hello $name!")
-    }
 
-    @Preview(showBackground = false)
-    @Composable
-    fun DefaultPreview() {
-        UzayanTheme {
-            Greeting("Android")
-        }
-    }
+//    @Preview(showBackground = false)
+//    @Composable
+//    fun DefaultPreview() {
+//        UzayanTheme {
+//            Greeting("Android")
+//        }
+//    }
 }
