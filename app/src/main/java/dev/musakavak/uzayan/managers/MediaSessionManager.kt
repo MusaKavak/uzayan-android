@@ -11,6 +11,7 @@ import android.util.Base64
 import android.util.Log
 import dev.musakavak.uzayan.models.MediaSession
 import dev.musakavak.uzayan.services.NLService
+import dev.musakavak.uzayan.socket.Emitter
 import java.io.ByteArrayOutputStream
 
 class MediaSessionManager(context: Context) {
@@ -63,12 +64,13 @@ class MediaSessionManager(context: Context) {
                 )
             )
         }
+        if (list.isNotEmpty()) Emitter.emitMediaSessions(list)
     }
 
     private fun getBase64(bitmap: Bitmap?): String? {
         bitmap?.let {
             val byteArrayOutputStream = ByteArrayOutputStream()
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 50, byteArrayOutputStream);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 10, byteArrayOutputStream);
             val byteArray = byteArrayOutputStream.toByteArray();
             return Base64.encodeToString(byteArray, Base64.DEFAULT);
         }

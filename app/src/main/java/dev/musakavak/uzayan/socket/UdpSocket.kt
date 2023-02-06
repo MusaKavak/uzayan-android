@@ -1,15 +1,13 @@
-package dev.musakavak.uzayan.managers
+package dev.musakavak.uzayan.socket
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
 
-class UdpSocketManager {
+class UdpSocket {
     companion object {
         private var udpSocket: DatagramSocket? = null
+        private const val address = "192.168.1.110"
 
         fun initializeSocket() {
             if (udpSocket == null) {
@@ -17,16 +15,7 @@ class UdpSocketManager {
             }
         }
 
-        fun getSocketAddress(): String {
-            udpSocket?.let {
-                it.inetAddress.hostAddress?.let { address ->
-                    return address
-                }
-            }
-            return "Empty"
-        }
-
-        fun sendMessage(message: String, address: String) {
+        fun sendMessage(message: String) {
             udpSocket?.let {
                 val byteArray = message.toByteArray()
                 val dp = DatagramPacket(
@@ -47,7 +36,7 @@ class UdpSocketManager {
                 )
                 it.receive(packet)
 
-                println("Received Packet:                                       ")
+                println("Received Packet")
                 println(packet)
                 listenSocket()
             }

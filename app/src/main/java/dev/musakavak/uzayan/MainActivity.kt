@@ -11,7 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import dev.musakavak.uzayan.managers.UdpSocketManager
+import dev.musakavak.uzayan.socket.UdpSocket
 import dev.musakavak.uzayan.services.UzayanForegroundService
 import dev.musakavak.uzayan.ui.theme.UzayanTheme
 import kotlinx.coroutines.Dispatchers
@@ -38,17 +38,14 @@ class MainActivity : ComponentActivity() {
     @Preview
     fun Home() {
         val scope = rememberCoroutineScope()
-
-        val sendAddress: MutableState<String> = remember { mutableStateOf("Address") }
         val message: MutableState<String> = remember { mutableStateOf("Message") }
 
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            TextField(value = sendAddress.value, onValueChange = { sendAddress.value = it })
             TextField(value = message.value, onValueChange = { message.value = it })
             Button(onClick = {
                 scope.launch {
                     withContext(Dispatchers.IO) {
-                        UdpSocketManager.sendMessage(message.value, sendAddress.value)
+                        UdpSocket.sendMessage(message.value)
                     }
                 }
             }) {
