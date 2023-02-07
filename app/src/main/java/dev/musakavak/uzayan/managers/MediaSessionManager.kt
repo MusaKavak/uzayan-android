@@ -8,7 +8,6 @@ import android.media.session.MediaController
 import android.media.session.MediaSessionManager
 import android.media.session.PlaybackState
 import android.util.Base64
-import android.util.Log
 import dev.musakavak.uzayan.models.MediaSession
 import dev.musakavak.uzayan.services.NLService
 import dev.musakavak.uzayan.socket.Emitter
@@ -44,27 +43,35 @@ class MediaSessionManager(context: Context) {
                 controller.registerCallback(callback)
             }
             if (it.isNotEmpty()) {
-                createMediaControllerList(it)
+                emitMediaSessions(it)
+            }
+        }
+    }
+    private fun createCallback(controller: MediaController): MediaController.Callback {
+        return object : MediaController.Callback() {
+            override fun onPlaybackStateChanged(state: PlaybackState?) {
+                super.onPlaybackStateChanged(state)
+                Emitter.emitSingleMediaSession(createSessionObject(controller))
             }
         }
     }
 
-    private fun createMediaControllerList(controllers: List<MediaController>) {
+    private fun emitMediaSessions(controllers: List<MediaController>) {
         val list: MutableList<MediaSession> = mutableListOf()
-        controllers.forEach {
-            list.add(
-                MediaSession(
-                    getBase64(it.metadata?.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART)),
-                    it.metadata?.getText(MediaMetadata.METADATA_KEY_ARTIST).toString(),
-                    it.metadata?.getText(MediaMetadata.METADATA_KEY_ALBUM).toString(),
-                    it.metadata?.getLong(MediaMetadata.METADATA_KEY_DURATION),
-                    it.packageName,
-                    it.metadata?.getText(MediaMetadata.METADATA_KEY_TITLE).toString(),
-                    it.sessionToken.hashCode()
-                )
-            )
-        }
+        controllers.forEach { list.add(createSessionObject(it)) }
         if (list.isNotEmpty()) Emitter.emitMediaSessions(list)
+    }
+
+    private fun createSessionObject(controller: MediaController): MediaSession {
+        return MediaSession(
+            getBase64(controller.metadata?.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART)),
+            controller.metadata?.getText(MediaMetadata.METADATA_KEY_ARTIST).toString(),
+            controller.metadata?.getText(MediaMetadata.METADATA_KEY_ALBUM).toString(),
+            controller.metadata?.getLong(MediaMetadata.METADATA_KEY_DURATION),
+            controller.packageName,
+            controller.metadata?.getText(MediaMetadata.METADATA_KEY_TITLE).toString(),
+            controller.sessionToken.hashCode()
+        )
     }
 
     private fun getBase64(bitmap: Bitmap?): String? {
@@ -77,23 +84,5 @@ class MediaSessionManager(context: Context) {
         return null
     }
 
-    private fun createCallback(controller: MediaController): MediaController.Callback {
-        return object : MediaController.Callback() {
-            override fun onPlaybackStateChanged(state: PlaybackState?) {
-                super.onPlaybackStateChanged(state)
-
-            }
-        }
-    }
-
-    private val tag = "MediaSessionManager"
-    fun printBundle(bundle: MediaMetadata?) {
-        val extras = bundle?.keySet()
-        Log.w(tag, "-------------------------------------------------")
-        extras?.forEach {
-            Log.i(tag, "Key: $it ----------- Value: ${bundle.getString(it)}")
-        }
-        Log.w(tag, "-------------------------------------------------")
-    }
 }
 

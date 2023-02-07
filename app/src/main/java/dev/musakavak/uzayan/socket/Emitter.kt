@@ -14,9 +14,16 @@ class Emitter {
         private val scope = CoroutineScope(Dispatchers.IO)
 
         fun emitMediaSessions(mediaSessions: List<MediaSession>) {
+            emit(EmitObject("MediaSessions", mediaSessions))
+        }
+
+        fun emitSingleMediaSession(mediaSession: MediaSession) {
+            emit(EmitObject("SingleMediaSession", mediaSession))
+        }
+
+        private fun <T> emit(emitObject: EmitObject<T>) {
             scope.launch {
                 withContext(Dispatchers.IO) {
-                    val emitObject = EmitObject("MediaSessions",mediaSessions)
                     val stringToEmit = Gson().toJson(emitObject)
                     UdpSocket.sendMessage(stringToEmit)
                 }
