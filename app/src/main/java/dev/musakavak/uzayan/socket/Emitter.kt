@@ -1,6 +1,7 @@
 package dev.musakavak.uzayan.socket
 
 import com.google.gson.Gson
+import dev.musakavak.uzayan.models.EmitObject
 import dev.musakavak.uzayan.models.MediaSession
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -15,7 +16,8 @@ class Emitter {
         fun emitMediaSessions(mediaSessions: List<MediaSession>) {
             scope.launch {
                 withContext(Dispatchers.IO) {
-                    val stringToEmit = Gson().toJson(mediaSessions)
+                    val emitObject = EmitObject("MediaSessions",mediaSessions)
+                    val stringToEmit = Gson().toJson(emitObject)
                     UdpSocket.sendMessage(stringToEmit)
                 }
             }
