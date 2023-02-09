@@ -39,6 +39,7 @@ class MainActivity : ComponentActivity() {
     fun Home() {
         val scope = rememberCoroutineScope()
         val message: MutableState<String> = remember { mutableStateOf("Message") }
+        val address: MutableState<String> = remember { mutableStateOf("") }
 
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             TextField(value = message.value, onValueChange = { message.value = it })
@@ -50,6 +51,12 @@ class MainActivity : ComponentActivity() {
                 }
             }) {
                 Text(text = "Send")
+            }
+            TextField(value = address.value, onValueChange = { address.value = it })
+            Button(onClick = {
+                UdpSocket.setAddress(address.value)
+            }) {
+                Text(text = "Set Address")
             }
         }
     }

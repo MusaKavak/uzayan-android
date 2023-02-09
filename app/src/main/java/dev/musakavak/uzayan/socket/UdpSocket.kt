@@ -7,7 +7,7 @@ import java.net.InetAddress
 class UdpSocket {
     companion object {
         private var udpSocket: DatagramSocket? = null
-        private const val address = "192.168.1.110"
+        private var address: InetAddress = InetAddress.getByName("192.168.1.108")
 
         fun initializeSocket() {
             if (udpSocket == null) {
@@ -21,7 +21,7 @@ class UdpSocket {
                 val dp = DatagramPacket(
                     byteArray,
                     byteArray.size,
-                    InetAddress.getByName(address),
+                    address,
                     34724
                 )
                 it.send(dp)
@@ -40,6 +40,10 @@ class UdpSocket {
                 println(packet)
                 listenSocket()
             }
+        }
+
+        fun setAddress(a: String) {
+            address = InetAddress.getByName(a)
         }
 
     }

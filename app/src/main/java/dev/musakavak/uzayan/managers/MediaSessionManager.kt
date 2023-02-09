@@ -77,7 +77,7 @@ class MediaSessionManager(context: Context) {
     private fun getBase64(bitmap: Bitmap?): String? {
         bitmap?.let {
             val byteArrayOutputStream = ByteArrayOutputStream()
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 10, byteArrayOutputStream);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 20, byteArrayOutputStream);
             val byteArray = byteArrayOutputStream.toByteArray();
             return Base64.encodeToString(byteArray, Base64.NO_WRAP)
         }
