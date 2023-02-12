@@ -9,6 +9,7 @@ import android.media.session.MediaSessionManager
 import android.media.session.PlaybackState
 import android.util.Base64
 import dev.musakavak.uzayan.models.MediaSession
+import dev.musakavak.uzayan.models.MediaSessionControl
 import dev.musakavak.uzayan.services.NLService
 import dev.musakavak.uzayan.socket.Emitter
 import java.io.ByteArrayOutputStream
@@ -19,7 +20,7 @@ class MediaSessionManager(context: Context) {
     private val componentName = ComponentName(context, NLService::class.java)
 
     private data class PreviousController(
-        val controller: MediaController, val callback: MediaController.Callback
+        val controller: MediaController, val callback: MediaController.Callback, val token: String
     )
 
     private var currentControllers: MutableList<PreviousController> = mutableListOf()
@@ -39,7 +40,13 @@ class MediaSessionManager(context: Context) {
         controllers?.let {
             it.forEach { controller ->
                 val callback = createCallback(controller)
-                currentControllers.add(PreviousController(controller, callback))
+                currentControllers.add(
+                    PreviousController(
+                        controller,
+                        callback,
+                        controller.sessionToken.hashCode().toString()
+                    )
+                )
                 controller.registerCallback(callback)
             }
             if (it.isNotEmpty()) {
@@ -47,6 +54,24 @@ class MediaSessionManager(context: Context) {
             }
         }
     }
+
+    fun mediaSessionControl(action: MediaSessionControl) {
+        val session = currentControllers.find { it.token == action.token }
+        println("MediaSessionControlReceived:                ::::")
+        println(session)
+        println("From")
+        println(currentControllers)
+        println("With action: " + action.action)
+        session?.controller?.transportControls?.let {
+            when (action.action) {
+                "0" -> it.pause()
+                "1" -> it.play()
+                "2" -> it.skipToNext()
+                "3" -> it.skipToPrevious()
+            }
+        }
+    }
+
     private fun createCallback(controller: MediaController): MediaController.Callback {
         return object : MediaController.Callback() {
             override fun onPlaybackStateChanged(state: PlaybackState?) {
@@ -68,16 +93,17 @@ class MediaSessionManager(context: Context) {
             controller.metadata?.getText(MediaMetadata.METADATA_KEY_ARTIST).toString(),
             controller.metadata?.getText(MediaMetadata.METADATA_KEY_ALBUM).toString(),
             controller.metadata?.getLong(MediaMetadata.METADATA_KEY_DURATION),
+            controller.playbackState?.state == 3,
             controller.packageName,
             controller.metadata?.getText(MediaMetadata.METADATA_KEY_TITLE).toString(),
-            controller.sessionToken.hashCode()
+            controller.sessionToken.hashCode().toString()
         )
     }
 
     private fun getBase64(bitmap: Bitmap?): String? {
         bitmap?.let {
             val byteArrayOutputStream = ByteArrayOutputStream()
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 20, byteArrayOutputStream);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 10, byteArrayOutputStream);
             val byteArray = byteArrayOutputStream.toByteArray();
             return Base64.encodeToString(byteArray, Base64.NO_WRAP)
         }

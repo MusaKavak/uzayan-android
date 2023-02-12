@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.IBinder
 import dev.musakavak.uzayan.managers.MediaSessionManager
+import dev.musakavak.uzayan.socket.Listener
 import dev.musakavak.uzayan.socket.UdpSocket
 import kotlinx.coroutines.*
 
@@ -33,17 +34,15 @@ class UzayanForegroundService : Service() {
     }
 
     override fun onCreate() {
-        MediaSessionManager(this).listen()
-
+        val mediaSessionManager = MediaSessionManager(this)
+        mediaSessionManager.listen()
         CoroutineScope(Dispatchers.IO).launch {
-            UdpSocket.initializeSocket()
+            val socket = UdpSocket.initializeSocket()
             CoroutineScope(Dispatchers.IO).launch {
-                UdpSocket.listenSocket()
+                socket?.let {
+                    Listener(socket, mediaSessionManager).listen()
+                }
             }
-//            while (true) {
-//                UdpSocket.sendMessage("Hello From Android", "192.168.1.110")
-//                delay(5000L)
-//            }
         }
     }
 }

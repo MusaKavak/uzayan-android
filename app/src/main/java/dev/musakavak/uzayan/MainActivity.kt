@@ -39,7 +39,7 @@ class MainActivity : ComponentActivity() {
     fun Home() {
         val scope = rememberCoroutineScope()
         val message: MutableState<String> = remember { mutableStateOf("Message") }
-        val address: MutableState<String> = remember { mutableStateOf("") }
+        val address: MutableState<String> = remember { mutableStateOf("192.168.1.") }
 
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             TextField(value = message.value, onValueChange = { message.value = it })

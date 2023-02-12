@@ -1,6 +1,6 @@
 package dev.musakavak.uzayan.models
 
-data class EmitObject<T>(
+data class ConnectionObject<T>(
     val message: String,
-    val emitObject: T
+    val input: T
 )
