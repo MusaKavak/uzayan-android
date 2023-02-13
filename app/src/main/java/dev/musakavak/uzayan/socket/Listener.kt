@@ -1,14 +1,8 @@
 package dev.musakavak.uzayan.socket
 
 import com.google.gson.Gson
-import com.google.gson.stream.JsonReader
 import dev.musakavak.uzayan.managers.MediaSessionManager
-import dev.musakavak.uzayan.models.ConnectionObject
-import dev.musakavak.uzayan.models.MediaSessionControl
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.json.JSONObject
-import java.io.StringReader
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 
@@ -34,12 +28,12 @@ class Listener(
         println("Received Packet With Message:  " + json.get("message"))
         when (json.get("message")) {
             "MediaSessionControl" -> {
-                val x = MediaSessionControl(
+                mediaSessionManager.mediaSessionControl(
                     json.getJSONObject("input").getString("token"),
-                    json.getJSONObject("input").getString("action"),
+                    json.getJSONObject("input").getString("action")
                 )
-                mediaSessionManager.mediaSessionControl(x)
             }
+            "MediaSessionsRequest" -> mediaSessionManager.sendCurrentSessions()
             else -> {
                 println("Message Not Found")
             }

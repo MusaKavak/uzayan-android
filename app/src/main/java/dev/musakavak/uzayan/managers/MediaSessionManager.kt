@@ -9,7 +9,6 @@ import android.media.session.MediaSessionManager
 import android.media.session.PlaybackState
 import android.util.Base64
 import dev.musakavak.uzayan.models.MediaSession
-import dev.musakavak.uzayan.models.MediaSessionControl
 import dev.musakavak.uzayan.services.NLService
 import dev.musakavak.uzayan.socket.Emitter
 import java.io.ByteArrayOutputStream
@@ -33,12 +32,12 @@ class MediaSessionManager(context: Context) {
     }
 
     private fun listenControllers(controllers: List<MediaController>?) {
-        currentControllers.forEach {
-            it.controller.unregisterCallback(it.callback)
-        }
-        currentControllers.clear()
-        controllers?.let {
-            it.forEach { controller ->
+        controllers?.let { newControllers ->
+            currentControllers.forEach { previousControllers ->
+                previousControllers.controller.unregisterCallback(previousControllers.callback)
+            }
+            currentControllers.clear()
+            newControllers.forEach { controller ->
                 val callback = createCallback(controller)
                 currentControllers.add(
                     PreviousController(
@@ -49,21 +48,18 @@ class MediaSessionManager(context: Context) {
                 )
                 controller.registerCallback(callback)
             }
-            if (it.isNotEmpty()) {
-                emitMediaSessions(it)
-            }
         }
+        emitMediaSessions(controllers)
     }
 
-    fun mediaSessionControl(action: MediaSessionControl) {
-        val session = currentControllers.find { it.token == action.token }
-        println("MediaSessionControlReceived:                ::::")
-        println(session)
-        println("From")
-        println(currentControllers)
-        println("With action: " + action.action)
+    fun sendCurrentSessions() {
+        emitMediaSessions(currentControllers.map { it.controller }.toList())
+    }
+
+    fun mediaSessionControl(token:String,action:String) {
+        val session = currentControllers.find { it.token == token }
         session?.controller?.transportControls?.let {
-            when (action.action) {
+            when (action) {
                 "0" -> it.pause()
                 "1" -> it.play()
                 "2" -> it.skipToNext()
@@ -81,10 +77,10 @@ class MediaSessionManager(context: Context) {
         }
     }
 
-    private fun emitMediaSessions(controllers: List<MediaController>) {
+    private fun emitMediaSessions(controllers: List<MediaController>?) {
         val list: MutableList<MediaSession> = mutableListOf()
-        controllers.forEach { list.add(createSessionObject(it)) }
-        if (list.isNotEmpty()) Emitter.emitMediaSessions(list)
+        controllers?.forEach { list.add(createSessionObject(it)) }
+        Emitter.emitMediaSessions(list)
     }
 
     private fun createSessionObject(controller: MediaController): MediaSession {
