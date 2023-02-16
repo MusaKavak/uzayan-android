@@ -13,6 +13,7 @@ class NotificationManager(private val context: Context) {
     private val base64Tool = Base64Tool()
 
     fun sendNotification(sbn: StatusBarNotification) {
+        if (sbn.notification.extras.containsKey("android.mediaSession")) return
         Emitter.emitNotification(createNotification(sbn))
     }
 
