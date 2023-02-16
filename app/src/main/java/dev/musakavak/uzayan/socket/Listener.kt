@@ -2,6 +2,7 @@ package dev.musakavak.uzayan.socket
 
 import com.google.gson.Gson
 import dev.musakavak.uzayan.managers.MediaSessionManager
+import dev.musakavak.uzayan.managers.NotificationManager
 import org.json.JSONObject
 import java.net.DatagramPacket
 import java.net.DatagramSocket
@@ -34,6 +35,12 @@ class Listener(
                 )
             }
             "MediaSessionsRequest" -> mediaSessionManager.sendCurrentSessions()
+            "NotificationAction" -> {
+                NotificationManager.sendAction(
+                    json.getJSONObject("input").getString("key"),
+                    json.getJSONObject("input").getString("action")
+                )
+            }
             else -> {
                 println("Message Not Found")
             }

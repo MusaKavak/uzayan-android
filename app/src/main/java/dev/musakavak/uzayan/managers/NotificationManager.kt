@@ -1,16 +1,38 @@
 package dev.musakavak.uzayan.managers
 
+import android.app.Notification as AndroidNotification
 import android.content.Context
-import android.content.pm.ApplicationInfo
-import android.graphics.drawable.Icon
 import android.service.notification.StatusBarNotification
-import android.util.Log
 import dev.musakavak.uzayan.models.Notification
 import dev.musakavak.uzayan.socket.Emitter
 import dev.musakavak.uzayan.tools.Base64Tool
 
 class NotificationManager(private val context: Context) {
     private val base64Tool = Base64Tool()
+
+    companion object {
+        private val currentNotificationActions = mutableListOf<NotificationAction>()
+
+        fun sendAction(key: String, actionTitle: String) {
+            currentNotificationActions
+                .firstOrNull { it.notificationKey == key }
+                ?.actions
+                ?.firstOrNull { it.actionTitle == actionTitle }
+                ?.invoke
+                ?.let { it() }
+        }
+    }
+
+    private data class Action(
+        val actionTitle: String?,
+        val invoke: () -> Unit,
+    )
+
+    private data class NotificationAction(
+        val notificationKey: String,
+        val actions: List<Action>
+    )
+
 
     fun sendNotification(sbn: StatusBarNotification) {
         if (sbn.notification.extras.containsKey("android.mediaSession")) return
@@ -30,8 +52,26 @@ class NotificationManager(private val context: Context) {
             base64Tool.fromIcon(nf.getLargeIcon(), context),
             sbn.packageName,
             extras.getString("android.title"),
-            extras.getString("android.text")
+            extras.getString("android.text"),
+            createNotificationActions(nf, sbn.key)
         )
     }
 
+    private fun createNotificationActions(nf: AndroidNotification, key: String): List<String>? {
+        if (nf.actions != null && nf.actions.isNotEmpty()) {
+            val actions = mutableListOf<Action>()
+            val actionTitles = mutableListOf<String>()
+            nf.actions.forEach {
+                val title = it.title.toString()
+                actions.add(Action(title) { it.actionIntent.send() })
+                actionTitles.add(title)
+            }
+            val na = NotificationAction(key, actions)
+            val found = currentNotificationActions.indexOfFirst { it.notificationKey == key }
+            if (found == -1) currentNotificationActions.add(na)
+            else currentNotificationActions[found] = na
+            return actionTitles
+        }
+        return null
+    }
 }
