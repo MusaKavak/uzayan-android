@@ -41,6 +41,7 @@ class Listener(
                     json.getJSONObject("input").getString("action")
                 )
             }
+            "NotificationsRequest" -> NotificationManager.syncNotifications()
             else -> {
                 println("Message Not Found")
             }

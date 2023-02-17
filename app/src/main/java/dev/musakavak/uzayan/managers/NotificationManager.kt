@@ -7,11 +7,19 @@ import dev.musakavak.uzayan.models.Notification
 import dev.musakavak.uzayan.socket.Emitter
 import dev.musakavak.uzayan.tools.Base64Tool
 
-class NotificationManager(private val context: Context) {
+class NotificationManager(
+    private val context: Context,
+    private val _getCurrentNotifications: () -> Unit
+) {
     private val base64Tool = Base64Tool()
+
+    init {
+        getCurrentNotifications = _getCurrentNotifications
+    }
 
     companion object {
         private val currentNotificationActions = mutableListOf<NotificationAction>()
+        private var getCurrentNotifications: (() -> Unit)? = null
 
         fun sendAction(key: String, actionTitle: String) {
             currentNotificationActions
@@ -20,6 +28,10 @@ class NotificationManager(private val context: Context) {
                 ?.firstOrNull { it.actionTitle == actionTitle }
                 ?.invoke
                 ?.let { it() }
+        }
+
+        fun syncNotifications() {
+            getCurrentNotifications?.let { it() }
         }
     }
 
@@ -37,6 +49,15 @@ class NotificationManager(private val context: Context) {
     fun sendNotification(sbn: StatusBarNotification) {
         if (sbn.notification.extras.containsKey("android.mediaSession")) return
         Emitter.emitNotification(createNotification(sbn))
+    }
+
+    fun sendNotificationList(list: Array<StatusBarNotification>) {
+        val notifications = mutableListOf<Notification>()
+        list.forEach {
+            if (!it.notification.extras.containsKey("android.mediaSession"))
+                notifications.add(createNotification(it))
+        }
+        Emitter.emitNotifications(notifications)
     }
 
     fun sendRemoveNotification(key: String) {

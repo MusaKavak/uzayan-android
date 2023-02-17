@@ -29,6 +29,10 @@ class Emitter {
             emit(ConnectionObject("RemoveNotification", key))
         }
 
+        fun emitNotifications(list: List<Notification>) {
+            emit(ConnectionObject("Notifications", list))
+        }
+
         private fun <T> emit(emitObject: ConnectionObject<T>) {
             scope.launch {
                 withContext(Dispatchers.IO) {

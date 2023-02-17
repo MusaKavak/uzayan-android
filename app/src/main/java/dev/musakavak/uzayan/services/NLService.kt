@@ -1,20 +1,16 @@
 package dev.musakavak.uzayan.services
 
-import android.media.MediaMetadata
-import android.os.Bundle
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
-import android.util.Log
 import dev.musakavak.uzayan.managers.NotificationManager
 
 class NLService : NotificationListenerService() {
-    private val tag = "NotificationListener"
     private var notificationManager: NotificationManager? = null
 
     override fun onListenerConnected() {
         super.onListenerConnected()
 
-        notificationManager = NotificationManager(applicationContext)
+        notificationManager = NotificationManager(applicationContext) { this.sendNotifications() }
         println("Notification Lıstener Connected")
     }
 
@@ -30,26 +26,7 @@ class NLService : NotificationListenerService() {
         }
     }
 
-    fun printBundle(bundle: Bundle?, message: Any) {
-        val extras = bundle?.keySet()
-        Log.w(tag, "-------------------------------------------------$message")
-        extras?.forEach {
-            val value = bundle.get(it)
-            Log.i(
-                tag,
-                "Key: $it ----------- Value: ${value}---------------------${if (value != null) value::class.qualifiedName else ""}"
-            )
-        }
-        Log.w(tag, "-------------------------------------------------")
+    private fun sendNotifications() {
+        notificationManager?.sendNotificationList(activeNotifications)
     }
 }
-//        sbn?.let {
-//            printBundle(sbn.notification.extras, "${sbn.packageName} ${sbn.key} ${sbn.groupKey}")
-//            println("****************************************************************************************************************************************************************************")
-//            sbn.notification.actions?.forEach { action ->
-//                sbn.
-//                action?.let {
-//                    printBundle(action.extras, "Title: ${action.title}")
-//                }
-//            }
-//        }
