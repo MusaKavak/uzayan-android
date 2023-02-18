@@ -1,5 +1,11 @@
 package dev.musakavak.uzayan.socket
 
+import com.google.gson.Gson
+import dev.musakavak.uzayan.models.ConnectionObject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
@@ -15,6 +21,17 @@ class UdpSocket {
                 return  udpSocket
             }
             return null
+        }
+
+        private val scope = CoroutineScope(Dispatchers.IO)
+
+        fun <T> emit(message: String, payload: T) {
+            scope.launch {
+                withContext(Dispatchers.IO) {
+                    val stringToEmit = Gson().toJson(ConnectionObject(message, payload))
+                    sendMessage(stringToEmit)
+                }
+            }
         }
 
         fun sendMessage(message: String) {

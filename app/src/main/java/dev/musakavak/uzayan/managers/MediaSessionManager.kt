@@ -10,7 +10,7 @@ import android.media.session.PlaybackState
 import android.util.Base64
 import dev.musakavak.uzayan.models.MediaSession
 import dev.musakavak.uzayan.services.NLService
-import dev.musakavak.uzayan.socket.Emitter
+import dev.musakavak.uzayan.socket.UdpSocket
 import java.io.ByteArrayOutputStream
 
 class MediaSessionManager(context: Context) {
@@ -56,7 +56,7 @@ class MediaSessionManager(context: Context) {
         emitMediaSessions(currentControllers.map { it.controller }.toList())
     }
 
-    fun mediaSessionControl(token:String,action:String) {
+    fun mediaSessionControl(token: String, action: String) {
         val session = currentControllers.find { it.token == token }
         session?.controller?.transportControls?.let {
             when (action) {
@@ -72,7 +72,7 @@ class MediaSessionManager(context: Context) {
         return object : MediaController.Callback() {
             override fun onPlaybackStateChanged(state: PlaybackState?) {
                 super.onPlaybackStateChanged(state)
-                Emitter.emitSingleMediaSession(createSessionObject(controller))
+                UdpSocket.emit("SingleMediaSession", createSessionObject(controller))
             }
         }
     }
@@ -80,7 +80,7 @@ class MediaSessionManager(context: Context) {
     private fun emitMediaSessions(controllers: List<MediaController>?) {
         val list: MutableList<MediaSession> = mutableListOf()
         controllers?.forEach { list.add(createSessionObject(it)) }
-        Emitter.emitMediaSessions(list)
+        UdpSocket.emit("SingleMediaSession", list)
     }
 
     private fun createSessionObject(controller: MediaController): MediaSession {
@@ -99,8 +99,8 @@ class MediaSessionManager(context: Context) {
     private fun getBase64(bitmap: Bitmap?): String? {
         bitmap?.let {
             val byteArrayOutputStream = ByteArrayOutputStream()
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 10, byteArrayOutputStream);
-            val byteArray = byteArrayOutputStream.toByteArray();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 10, byteArrayOutputStream)
+            val byteArray = byteArrayOutputStream.toByteArray()
             return Base64.encodeToString(byteArray, Base64.NO_WRAP)
         }
         return null

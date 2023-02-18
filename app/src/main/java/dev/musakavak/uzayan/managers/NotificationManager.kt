@@ -4,12 +4,12 @@ import android.app.Notification as AndroidNotification
 import android.content.Context
 import android.service.notification.StatusBarNotification
 import dev.musakavak.uzayan.models.Notification
-import dev.musakavak.uzayan.socket.Emitter
+import dev.musakavak.uzayan.socket.UdpSocket
 import dev.musakavak.uzayan.tools.Base64Tool
 
 class NotificationManager(
     private val context: Context,
-    private val _getCurrentNotifications: () -> Unit
+    _getCurrentNotifications: () -> Unit
 ) {
     private val base64Tool = Base64Tool()
 
@@ -48,7 +48,7 @@ class NotificationManager(
 
     fun sendNotification(sbn: StatusBarNotification) {
         if (sbn.notification.extras.containsKey("android.mediaSession")) return
-        Emitter.emitNotification(createNotification(sbn))
+        UdpSocket.emit("Notification", createNotification(sbn))
     }
 
     fun sendNotificationList(list: Array<StatusBarNotification>) {
@@ -57,11 +57,11 @@ class NotificationManager(
             if (!it.notification.extras.containsKey("android.mediaSession"))
                 notifications.add(createNotification(it))
         }
-        Emitter.emitNotifications(notifications)
+        UdpSocket.emit("Notifications", notifications)
     }
 
     fun sendRemoveNotification(key: String) {
-        Emitter.emitRemoveNotification(key)
+        UdpSocket.emit("RemoveNotification", key)
     }
 
     private fun createNotification(sbn: StatusBarNotification): Notification {
