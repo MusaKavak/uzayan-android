@@ -80,7 +80,7 @@ class MediaSessionManager(context: Context) {
     private fun emitMediaSessions(controllers: List<MediaController>?) {
         val list: MutableList<MediaSession> = mutableListOf()
         controllers?.forEach { list.add(createSessionObject(it)) }
-        UdpSocket.emit("SingleMediaSession", list)
+        UdpSocket.emit("MediaSessions", list)
     }
 
     private fun createSessionObject(controller: MediaController): MediaSession {
