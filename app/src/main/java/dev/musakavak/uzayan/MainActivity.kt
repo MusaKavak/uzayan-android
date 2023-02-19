@@ -30,7 +30,22 @@ class MainActivity : ComponentActivity() {
                 Surface(
                     modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background
                 ) {
-                    Home()
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        val urlArgs = intent.data
+                        urlArgs?.let {
+                            val ip = it.getQueryParameter("ip")
+                            val code = it.getQueryParameter("code")
+
+                            if (ip != null && code != null) {
+                                UdpSocket.setAddress(ip)
+                                UdpSocket.emit("Pair", code)
+                                Text(text = "Pair Request Sent")
+                            } else {
+                                Text(text = "Query Parameters Not Correct")
+                            }
+                        }
+                        Home()
+                    }
                 }
             }
         }

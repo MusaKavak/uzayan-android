@@ -25,7 +25,8 @@ class Listener(
         val json = JSONObject(string)
         println("Received Packet With Message:  " + json.get("message"))
         when (json.get("message")) {
-            "TestConnection" -> UdpSocket.emit("TestConnection",null)
+            "TestConnection" -> UdpSocket.emit("TestConnection", null)
+            "Pair" -> UdpSocket.setAddress(json.getString("address"))
             "MediaSessionControl" -> {
                 mediaSessionManager.mediaSessionControl(
                     json.getJSONObject("input").getString("token"),
