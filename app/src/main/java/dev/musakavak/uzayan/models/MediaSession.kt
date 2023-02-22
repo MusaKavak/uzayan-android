@@ -7,6 +7,8 @@ data class MediaSession(
     val duration: Long?,
     val isPlaying: Boolean?,
     val packageName: String?,
+    val position: Long?,
+    val ratingType: String?,
     val title: String?,
     val token: String?
 )

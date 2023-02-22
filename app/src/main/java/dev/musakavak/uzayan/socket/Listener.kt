@@ -30,7 +30,8 @@ class Listener(
             "MediaSessionControl" -> {
                 mediaSessionManager.mediaSessionControl(
                     json.getJSONObject("input").getString("token"),
-                    json.getJSONObject("input").getString("action")
+                    json.getJSONObject("input").getString("action"),
+                    json.getJSONObject("input").get("value"),
                 )
             }
             "MediaSessionsRequest" -> mediaSessionManager.sendCurrentSessions()
