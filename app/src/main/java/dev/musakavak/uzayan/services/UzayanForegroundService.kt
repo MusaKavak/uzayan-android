@@ -7,6 +7,7 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.os.IBinder
+import dev.musakavak.uzayan.managers.ImageManager
 import dev.musakavak.uzayan.managers.MediaSessionManager
 import dev.musakavak.uzayan.socket.Listener
 import dev.musakavak.uzayan.socket.UdpSocket
@@ -36,11 +37,12 @@ class UzayanForegroundService : Service() {
     override fun onCreate() {
         val mediaSessionManager = MediaSessionManager(this)
         mediaSessionManager.listen()
+        val imageManager = ImageManager(this)
         CoroutineScope(Dispatchers.IO).launch {
             val socket = UdpSocket.initializeSocket()
             CoroutineScope(Dispatchers.IO).launch {
                 socket?.let {
-                    Listener(socket, mediaSessionManager).listen()
+                    Listener(socket, mediaSessionManager,imageManager).listen()
                 }
             }
         }

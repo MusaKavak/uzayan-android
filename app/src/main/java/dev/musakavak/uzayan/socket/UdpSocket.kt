@@ -13,7 +13,7 @@ import java.net.InetAddress
 class UdpSocket {
     companion object {
         private var udpSocket: DatagramSocket? = null
-        private var address: InetAddress = InetAddress.getByName("192.168.1.111")
+        private var address: InetAddress = InetAddress.getByName("192.168.1.112")
 
         fun initializeSocket(): DatagramSocket?{
             if (udpSocket == null) {

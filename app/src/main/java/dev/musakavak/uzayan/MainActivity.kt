@@ -23,6 +23,10 @@ import kotlinx.coroutines.withContext
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+//        val permission = registerForActivityResult(ActivityResultContracts.RequestPermission()) {
+//            it
+//        }
+//        permission.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
         startForeground()
         setContent {
             UzayanTheme {
@@ -87,12 +91,16 @@ class MainActivity : ComponentActivity() {
         startForegroundService(intent)
     }
 
-
-//    @Preview(showBackground = false)
-//    @Composable
-//    fun DefaultPreview() {
-//        UzayanTheme {
-//            Greeting("Android")
+//    fun requestReadStorePermission() {
+//        when {
+//            ContextCompat.checkSelfPermission(
+//                this,
+//                Manifest.permission.READ_EXTERNAL_STORAGE
+//            ) == PackageManager.PERMISSION_GRANTED -> {
+//                //Permission Granted
+//                val x = 2
+//            }
+//            else -> requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), 1)
 //        }
 //    }
 }
