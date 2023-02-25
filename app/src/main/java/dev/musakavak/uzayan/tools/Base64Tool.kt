@@ -13,7 +13,7 @@ import java.io.ByteArrayOutputStream
 class Base64Tool {
 
 
-    private fun fromBitmap(bitmap: Bitmap?, quality: Int): String? {
+    fun fromBitmap(bitmap: Bitmap?, quality: Int): String? {
         bitmap?.let {
             val byteArrayOutputStream = ByteArrayOutputStream()
             bitmap.compress(Bitmap.CompressFormat.JPEG, quality, byteArrayOutputStream);

@@ -40,7 +40,7 @@ class Listener(
                 json.getJSONObject("input").getString("action")
             )
             "NotificationsRequest" -> NotificationManager.syncNotifications()
-            "ReducedImageRequest" -> imageManager.sendSlice(
+            "ImageThumbnailRequest" -> imageManager.sendSlice(
                 json.getJSONObject("input").getInt("start"),
                 json.getJSONObject("input").getInt("length"),
             )

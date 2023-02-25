@@ -1,11 +1,13 @@
 package dev.musakavak.uzayan.managers
 
+import android.content.ContentResolver
 import android.content.ContentUris
 import android.content.Context
 import android.database.Cursor
 import android.net.Uri
 import android.provider.MediaStore
-import dev.musakavak.uzayan.models.Image
+import androidx.compose.ui.geometry.Size
+import dev.musakavak.uzayan.models.ImageThumbnail
 import dev.musakavak.uzayan.socket.UdpSocket
 import dev.musakavak.uzayan.tools.Base64Tool
 
@@ -16,6 +18,7 @@ class ImageManager(private val context: Context) {
         MediaStore.Images.Media.DATE_ADDED
     )
     private val base64Tool = Base64Tool()
+    private val contentResolver = context.contentResolver
     private val tag = "ImagesManager"
 
     fun sendSlice(start: Int?, length: Int?) {
@@ -23,7 +26,7 @@ class ImageManager(private val context: Context) {
         invokeCursor {
             if (it.moveToPosition(start)) {
                 for (i in 1..length) {
-                    sendReducedImage(it)
+                    sendThumbnail(it)
                     if (!it.moveToNext()) break
                 }
             }
@@ -39,11 +42,11 @@ class ImageManager(private val context: Context) {
         }
     }
 
-    private fun sendReducedImage(cursor: Cursor) {
-        UdpSocket.emit("ReducedImage", getReducedImage(cursor))
+    private fun sendThumbnail(cursor: Cursor) {
+        UdpSocket.emit("ImageThumbnail", getThumbnail(cursor))
     }
 
-    private fun getReducedImage(cursor: Cursor): Image {
+    private fun getThumbnail(cursor: Cursor): ImageThumbnail {
         val id = cursor.getLong(
             cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
         )
@@ -55,12 +58,15 @@ class ImageManager(private val context: Context) {
             cursor.getLong(
                 cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_ADDED)
             ).toString()
-        val base64 = base64Tool.fromUri(getUri(id), context, 50)
-        return Image(
+
+        val thumbnail = contentResolver.loadThumbnail(
+            getUri(id),
+            android.util.Size(120, 120), null
+        )
+        return ImageThumbnail(
             id.toString(),
-            base64,
-            name,
-            true
+            base64Tool.fromBitmap(thumbnail, 100),
+            name
         )
     }
 
