@@ -57,7 +57,7 @@ class ImageManager(private val context: Context) {
         val date =
             cursor.getLong(
                 cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_ADDED)
-            ).toString()
+            )
 
         val thumbnail = contentResolver.loadThumbnail(
             getUri(id),
@@ -66,7 +66,9 @@ class ImageManager(private val context: Context) {
         return ImageThumbnail(
             id.toString(),
             base64Tool.fromBitmap(thumbnail, 100),
-            name
+            name,
+            cursor.position,
+            date
         )
     }
 
