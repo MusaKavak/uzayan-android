@@ -12,7 +12,7 @@ class UdpSocket {
     companion object {
         private var udpSocket: DatagramSocket? = null
         private var address: InetAddress = InetAddress.getByName("192.168.1.109")
-        private const val chunkSize = 1500
+        private const val chunkSize = 1900
         private var packetId = 0
 
         fun initializeSocket(): DatagramSocket? {
