@@ -58,21 +58,11 @@ class MainActivity : ComponentActivity() {
     @Composable
     @Preview
     fun Home() {
-        val scope = rememberCoroutineScope()
         val message: MutableState<String> = remember { mutableStateOf("Message") }
         val address: MutableState<String> = remember { mutableStateOf("192.168.1.") }
 
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             TextField(value = message.value, onValueChange = { message.value = it })
-            Button(onClick = {
-                scope.launch {
-                    withContext(Dispatchers.IO) {
-                        UdpSocket.sendMessage(message.value)
-                    }
-                }
-            }) {
-                Text(text = "Send")
-            }
             TextField(
                 value = address.value,
                 onValueChange = { address.value = it },
