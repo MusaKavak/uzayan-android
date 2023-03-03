@@ -3,7 +3,6 @@ package dev.musakavak.uzayan.tools
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Icon
 import android.net.Uri
 import android.util.Base64
@@ -31,7 +30,7 @@ class Base64Tool {
         return null
     }
 
-    fun fromUri(uri: Uri, context: Context,quality: Int): String? {
+    fun fromUri(uri: Uri, context: Context, quality: Int): String? {
         val inputStream = context.contentResolver.openInputStream(uri)
         val bitmap = BitmapFactory.decodeStream(inputStream)
         return fromBitmap(bitmap, quality)

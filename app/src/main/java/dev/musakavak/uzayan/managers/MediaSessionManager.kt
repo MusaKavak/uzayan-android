@@ -2,23 +2,22 @@ package dev.musakavak.uzayan.managers
 
 import android.content.ComponentName
 import android.content.Context
-import android.graphics.Bitmap
 import android.media.MediaMetadata
 import android.media.Rating
 import android.media.session.MediaController
 import android.media.session.MediaSessionManager
 import android.media.session.PlaybackState
-import android.util.Base64
 import dev.musakavak.uzayan.models.MediaSession
 import dev.musakavak.uzayan.models.MediaSessionState
 import dev.musakavak.uzayan.services.NLService
 import dev.musakavak.uzayan.socket.UdpSocket
-import java.io.ByteArrayOutputStream
+import dev.musakavak.uzayan.tools.Base64Tool
 
 class MediaSessionManager(context: Context) {
     private val manager: MediaSessionManager =
         context.getSystemService(Context.MEDIA_SESSION_SERVICE) as MediaSessionManager
     private val componentName = ComponentName(context, NLService::class.java)
+    private val imageTool = Base64Tool()
 
     private data class PreviousController(
         val controller: MediaController, val callback: MediaController.Callback, val token: String
@@ -113,7 +112,7 @@ class MediaSessionManager(context: Context) {
             else -> null
         }
         return MediaSession(
-            getBase64(controller.metadata?.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART)),
+            imageTool.fromBitmap(controller.metadata?.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART),70),
             controller.metadata?.getText(MediaMetadata.METADATA_KEY_ARTIST).toString(),
             controller.metadata?.getText(MediaMetadata.METADATA_KEY_ALBUM).toString(),
             controller.metadata?.getLong(MediaMetadata.METADATA_KEY_DURATION),
@@ -126,16 +125,5 @@ class MediaSessionManager(context: Context) {
         )
 
     }
-
-    private fun getBase64(bitmap: Bitmap?): String? {
-        bitmap?.let {
-            val byteArrayOutputStream = ByteArrayOutputStream()
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 10, byteArrayOutputStream)
-            val byteArray = byteArrayOutputStream.toByteArray()
-            return Base64.encodeToString(byteArray, Base64.NO_WRAP)
-        }
-        return null
-    }
-
 }
 

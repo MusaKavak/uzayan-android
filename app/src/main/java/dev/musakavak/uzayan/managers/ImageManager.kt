@@ -1,12 +1,10 @@
 package dev.musakavak.uzayan.managers
 
-import android.content.ContentResolver
 import android.content.ContentUris
 import android.content.Context
 import android.database.Cursor
 import android.net.Uri
 import android.provider.MediaStore
-import androidx.compose.ui.geometry.Size
 import dev.musakavak.uzayan.models.ImageThumbnail
 import dev.musakavak.uzayan.socket.UdpSocket
 import dev.musakavak.uzayan.tools.Base64Tool
@@ -17,9 +15,8 @@ class ImageManager(private val context: Context) {
         MediaStore.Images.Media.DISPLAY_NAME,
         MediaStore.Images.Media.DATE_ADDED
     )
-    private val base64Tool = Base64Tool()
+    private val imageTool = Base64Tool()
     private val contentResolver = context.contentResolver
-    private val tag = "ImagesManager"
 
     fun sendSlice(start: Int?, length: Int?) {
         if (start == null || length == null) return
@@ -38,7 +35,7 @@ class ImageManager(private val context: Context) {
         val idAsLong = id.toLongOrNull()
         idAsLong?.let {
             val uri = getUri(it)
-            base64Tool.fromUri(uri, context, 100)
+            imageTool.fromUri(uri, context, 100)
         }
     }
 
@@ -65,7 +62,7 @@ class ImageManager(private val context: Context) {
         )
         return ImageThumbnail(
             id.toString(),
-            base64Tool.fromBitmap(thumbnail, 100),
+            imageTool.fromBitmap(thumbnail, 100),
             name,
             cursor.position,
             date
