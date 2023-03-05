@@ -9,7 +9,9 @@ import android.content.Intent
 import android.os.IBinder
 import dev.musakavak.uzayan.managers.ImageManager
 import dev.musakavak.uzayan.managers.MediaSessionManager
+import dev.musakavak.uzayan.socket.Actions
 import dev.musakavak.uzayan.socket.Listener
+import dev.musakavak.uzayan.socket.TcpSocketServer
 import dev.musakavak.uzayan.socket.UdpSocket
 import kotlinx.coroutines.*
 
@@ -39,12 +41,18 @@ class UzayanForegroundService : Service() {
         mediaSessionManager.listen()
         val imageManager = ImageManager(this)
         CoroutineScope(Dispatchers.IO).launch {
-            val socket = UdpSocket.initializeSocket()
-            CoroutineScope(Dispatchers.IO).launch {
-                socket?.let {
-                    Listener(socket, mediaSessionManager,imageManager).listen()
-                }
-            }
+            TcpSocketServer(
+                Actions(
+                    mediaSessionManager,
+                    imageManager
+                )
+            ).initializeSocketServer()
+//            val socket = UdpSocket.initializeSocket()
+//            CoroutineScope(Dispatchers.IO).launch {
+//                socket?.let {
+//                    Listener(socket, mediaSessionManager,imageManager).listen()
+//                }
+//            }
         }
     }
 }

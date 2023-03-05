@@ -23,33 +23,6 @@ class Listener(
     }
 
     private fun call(packet: DatagramPacket) {
-        val string = String(packet.data)
-        val json = JSONObject(string)
-        println("Received Packet With Message:  " + json.get("message"))
-        when (json.get("message")) {
-            "TestConnection" -> UdpSocket.emit("TestConnection", null)
-            "Pair" -> UdpSocket.setAddress(json.getString("address"))
-            "MediaSessionControl" -> mediaSessionManager.mediaSessionControl(
-                json.getJSONObject("input").getString("token"),
-                json.getJSONObject("input").getString("action"),
-                json.getJSONObject("input").get("value"),
-            )
-            "MediaSessionsRequest" -> mediaSessionManager.sendCurrentSessions()
-            "NotificationAction" -> NotificationManager.sendAction(
-                json.getJSONObject("input").getString("key"),
-                json.getJSONObject("input").getString("action")
-            )
-            "NotificationsRequest" -> NotificationManager.syncNotifications()
-            "ImageThumbnailRequest" -> imageManager.sendSlice(
-                json.getJSONObject("input").getInt("start"),
-                json.getJSONObject("input").getInt("length"),
-            )
-            "FullSizeImageRequest" -> imageManager.sendFullSizeImage(
-                json.getJSONObject("input").getString("id"),
-            )
-            else -> {
-                println("Message Not Found")
-            }
-        }
+
     }
 }
