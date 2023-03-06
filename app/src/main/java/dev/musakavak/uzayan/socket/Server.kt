@@ -1,6 +1,7 @@
 package dev.musakavak.uzayan.socket
 
 import android.util.Log
+import dev.musakavak.uzayan.models.PairObject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -11,12 +12,16 @@ import java.io.InputStreamReader
 import java.net.ServerSocket
 import java.net.Socket
 
-class TcpSocketServer(
+class Server(
     private val actions: Actions
 ) {
 
     private var socketServer: ServerSocket? = null
     private val tag = "TcpSocketServer"
+
+    companion object{
+        var pairObject: PairObject? = null
+    }
 
     suspend fun initializeSocketServer() {
         withContext(Dispatchers.IO) {
@@ -54,8 +59,8 @@ class TcpSocketServer(
             println("Received Packet With Message:  " + json.get("message"))
 
             when (json.get("message")) {
-                //  "TestConnection" -> UdpSocket.emit("TestConnection", null)
-                //  "Pair" -> UdpSocket.setAddress(json.getString("address"))
+                "TestConnection" -> Client.emit("TestConnection", null)
+                "Pair" -> actions.pair(json)
                 "MediaSessionControl" -> actions.mediaSessionControl(json)
                 "MediaSessionsRequest" -> actions.mediaSessionRequest()
                 "NotificationAction" -> actions.notificationAction(json)

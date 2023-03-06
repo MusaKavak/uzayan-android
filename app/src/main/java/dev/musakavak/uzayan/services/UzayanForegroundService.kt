@@ -10,9 +10,7 @@ import android.os.IBinder
 import dev.musakavak.uzayan.managers.ImageManager
 import dev.musakavak.uzayan.managers.MediaSessionManager
 import dev.musakavak.uzayan.socket.Actions
-import dev.musakavak.uzayan.socket.Listener
-import dev.musakavak.uzayan.socket.TcpSocketServer
-import dev.musakavak.uzayan.socket.UdpSocket
+import dev.musakavak.uzayan.socket.Server
 import kotlinx.coroutines.*
 
 class UzayanForegroundService : Service() {
@@ -37,12 +35,14 @@ class UzayanForegroundService : Service() {
     }
 
     override fun onCreate() {
+        val shp = getSharedPreferences("UzayanConnection", MODE_PRIVATE)
         val mediaSessionManager = MediaSessionManager(this)
         mediaSessionManager.listen()
         val imageManager = ImageManager(this)
         CoroutineScope(Dispatchers.IO).launch {
-            TcpSocketServer(
+            Server(
                 Actions(
+                    shp,
                     mediaSessionManager,
                     imageManager
                 )

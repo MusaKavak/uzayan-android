@@ -6,19 +6,16 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
-import dev.musakavak.uzayan.socket.UdpSocket
+import androidx.compose.ui.unit.Dp
 import dev.musakavak.uzayan.services.UzayanForegroundService
+import dev.musakavak.uzayan.socket.Client
 import dev.musakavak.uzayan.ui.theme.UzayanTheme
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,14 +35,13 @@ class MainActivity : ComponentActivity() {
                         val urlArgs = intent.data
                         urlArgs?.let {
                             val ip = it.getQueryParameter("ip")
+                            val port = it.getQueryParameter("port")?.toIntOrNull()
                             val code = it.getQueryParameter("code")
-
-                            if (ip != null && code != null) {
-                                UdpSocket.setAddress(ip)
-                                UdpSocket.emit("Pair", code)
+                            if (ip != null && port != null && code != null) {
+                                Client.initializeClient(ip, port,true,code)
                                 Text(text = "Pair Request Sent")
                             } else {
-                                Text(text = "Query Parameters Not Correct")
+                                Text(text = "Some Error Occurred")
                             }
                         }
                         Home()
@@ -58,21 +54,8 @@ class MainActivity : ComponentActivity() {
     @Composable
     @Preview
     fun Home() {
-        val message: MutableState<String> = remember { mutableStateOf("Message") }
-        val address: MutableState<String> = remember { mutableStateOf("192.168.1.") }
-
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            TextField(value = message.value, onValueChange = { message.value = it })
-            TextField(
-                value = address.value,
-                onValueChange = { address.value = it },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-            )
-            Button(onClick = {
-                UdpSocket.setAddress(address.value)
-            }) {
-                Text(text = "Set Address")
-            }
+            Text(text = "Uzayan", Modifier.size(Dp(50F)))
         }
     }
 
@@ -80,17 +63,5 @@ class MainActivity : ComponentActivity() {
         val intent = Intent(this, UzayanForegroundService::class.java)
         startForegroundService(intent)
     }
-
-//    fun requestReadStorePermission() {
-//        when {
-//            ContextCompat.checkSelfPermission(
-//                this,
-//                Manifest.permission.READ_EXTERNAL_STORAGE
-//            ) == PackageManager.PERMISSION_GRANTED -> {
-//                //Permission Granted
-//                val x = 2
-//            }
-//            else -> requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), 1)
-//        }
-//    }
 }
+
