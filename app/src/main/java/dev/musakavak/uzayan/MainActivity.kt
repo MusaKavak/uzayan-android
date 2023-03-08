@@ -14,7 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import dev.musakavak.uzayan.services.UzayanForegroundService
-import dev.musakavak.uzayan.socket.Client
+import dev.musakavak.uzayan.tools.PairTool
 import dev.musakavak.uzayan.ui.theme.UzayanTheme
 
 class MainActivity : ComponentActivity() {
@@ -38,7 +38,7 @@ class MainActivity : ComponentActivity() {
                             val port = it.getQueryParameter("port")?.toIntOrNull()
                             val code = it.getQueryParameter("code")
                             if (ip != null && port != null && code != null) {
-                                Client.initializeClient(ip, port,true,code)
+                                PairTool().sendPairRequest(ip,port,code)
                                 Text(text = "Pair Request Sent")
                             } else {
                                 Text(text = "Some Error Occurred")

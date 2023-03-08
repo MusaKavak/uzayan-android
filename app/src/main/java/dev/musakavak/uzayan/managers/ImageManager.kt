@@ -6,7 +6,7 @@ import android.database.Cursor
 import android.net.Uri
 import android.provider.MediaStore
 import dev.musakavak.uzayan.models.ImageThumbnail
-import dev.musakavak.uzayan.socket.Client
+import dev.musakavak.uzayan.socket.TcpSocket
 import dev.musakavak.uzayan.tools.Base64Tool
 
 class ImageManager(private val context: Context) {
@@ -40,7 +40,7 @@ class ImageManager(private val context: Context) {
     }
 
     private fun sendThumbnail(cursor: Cursor) {
-        Client.emit("ImageThumbnail", getThumbnail(cursor))
+        TcpSocket.emit("ImageThumbnail", getThumbnail(cursor))
     }
 
     private fun getThumbnail(cursor: Cursor): ImageThumbnail {

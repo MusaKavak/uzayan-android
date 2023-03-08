@@ -10,7 +10,7 @@ import android.media.session.PlaybackState
 import dev.musakavak.uzayan.models.MediaSession
 import dev.musakavak.uzayan.models.MediaSessionState
 import dev.musakavak.uzayan.services.NLService
-import dev.musakavak.uzayan.socket.Client
+import dev.musakavak.uzayan.socket.TcpSocket
 import dev.musakavak.uzayan.tools.Base64Tool
 
 class MediaSessionManager(context: Context) {
@@ -78,7 +78,7 @@ class MediaSessionManager(context: Context) {
             override fun onPlaybackStateChanged(state: PlaybackState?) {
                 val rating = controller.metadata?.getRating(MediaMetadata.METADATA_KEY_USER_RATING)
                 state?.let {
-                    Client.emit(
+                    TcpSocket.emit(
                         "MediaSessionState", MediaSessionState(
                             controller.sessionToken.hashCode().toString(),
                             state.state == 3,
@@ -93,7 +93,7 @@ class MediaSessionManager(context: Context) {
             }
 
             override fun onMetadataChanged(metadata: MediaMetadata?) {
-                Client.emit("SingleMediaSession", createSessionObject(controller))
+                TcpSocket.emit("SingleMediaSession", createSessionObject(controller))
             }
         }
     }
@@ -101,7 +101,7 @@ class MediaSessionManager(context: Context) {
     private fun emitMediaSessions(controllers: List<MediaController>?) {
         val list: MutableList<MediaSession> = mutableListOf()
         controllers?.forEach { list.add(createSessionObject(it)) }
-        Client.emit("MediaSessions", list)
+        TcpSocket.emit("MediaSessions", list)
     }
 
     private fun createSessionObject(controller: MediaController): MediaSession {

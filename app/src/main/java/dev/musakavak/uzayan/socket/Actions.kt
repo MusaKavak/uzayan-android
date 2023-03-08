@@ -54,8 +54,8 @@ class Actions(
         val port = json.getJSONObject("input").getString("port")
 
         shp.edit().apply {
-            putString("RemoteServerAddress", address)
-            putString("RemoteServerPort", port)
+            putString("ClientAddress", address)
+            putString("ClientPort", port)
             apply()
         }
     }

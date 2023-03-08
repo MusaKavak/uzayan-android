@@ -4,7 +4,7 @@ import android.app.Notification as AndroidNotification
 import android.content.Context
 import android.service.notification.StatusBarNotification
 import dev.musakavak.uzayan.models.Notification
-import dev.musakavak.uzayan.socket.Client
+import dev.musakavak.uzayan.socket.TcpSocket
 import dev.musakavak.uzayan.tools.Base64Tool
 
 class NotificationManager(
@@ -48,7 +48,7 @@ class NotificationManager(
 
     fun sendNotification(sbn: StatusBarNotification) {
         if (sbn.notification.extras.containsKey("android.mediaSession")) return
-        Client.emit("Notification", createNotification(sbn))
+        TcpSocket.emit("Notification", createNotification(sbn))
     }
 
     fun sendNotificationList(list: Array<StatusBarNotification>) {
@@ -57,11 +57,11 @@ class NotificationManager(
             if (!it.notification.extras.containsKey("android.mediaSession"))
                 notifications.add(createNotification(it))
         }
-        Client.emit("Notifications", notifications)
+        //Client.emit("Notifications", notifications)
     }
 
     fun sendRemoveNotification(key: String) {
-        Client.emit("RemoveNotification", key)
+        TcpSocket.emit("RemoveNotification", key)
     }
 
     private fun createNotification(sbn: StatusBarNotification): Notification {
