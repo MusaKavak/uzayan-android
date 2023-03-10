@@ -1,6 +1,5 @@
 package dev.musakavak.uzayan.socket
 
-import android.content.Context
 import android.content.SharedPreferences
 import dev.musakavak.uzayan.managers.ImageManager
 import dev.musakavak.uzayan.managers.MediaSessionManager
