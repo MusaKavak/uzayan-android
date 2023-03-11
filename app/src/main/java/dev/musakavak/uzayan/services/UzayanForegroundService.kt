@@ -7,6 +7,7 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.os.IBinder
+import dev.musakavak.uzayan.managers.FileManager
 import dev.musakavak.uzayan.managers.ImageManager
 import dev.musakavak.uzayan.managers.MediaSessionManager
 import dev.musakavak.uzayan.socket.Actions
@@ -37,6 +38,7 @@ class UzayanForegroundService : Service() {
     override fun onCreate() {
         val shp = getSharedPreferences("UzayanConnection", MODE_PRIVATE)
         val mediaSessionManager = MediaSessionManager(this)
+        val fileManager = FileManager()
         mediaSessionManager.listen()
         val imageManager = ImageManager(this)
         CoroutineScope(Dispatchers.IO).launch {
@@ -44,7 +46,8 @@ class UzayanForegroundService : Service() {
                 Actions(
                     shp,
                     mediaSessionManager,
-                    imageManager
+                    imageManager,
+                    fileManager
                 )
             ).initializeSocketServer()
         }

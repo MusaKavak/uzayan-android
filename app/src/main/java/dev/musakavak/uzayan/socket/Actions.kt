@@ -1,6 +1,7 @@
 package dev.musakavak.uzayan.socket
 
 import android.content.SharedPreferences
+import dev.musakavak.uzayan.managers.FileManager
 import dev.musakavak.uzayan.managers.ImageManager
 import dev.musakavak.uzayan.managers.MediaSessionManager
 import dev.musakavak.uzayan.managers.NotificationManager
@@ -9,7 +10,8 @@ import org.json.JSONObject
 class Actions(
     private val shp: SharedPreferences,
     private val mediaSessionManager: MediaSessionManager,
-    private val imageManager: ImageManager
+    private val imageManager: ImageManager,
+    private val fileManager: FileManager
 ) {
 
     fun mediaSessionControl(json: JSONObject) {
@@ -39,6 +41,12 @@ class Actions(
         imageManager.sendSlice(
             json.getJSONObject("input").getInt("start"),
             json.getJSONObject("input").getInt("length"),
+        )
+    }
+
+    fun fileRequest(json: JSONObject) {
+        fileManager.sendFile(
+            json.getJSONObject("input").getString("path"),
         )
     }
 

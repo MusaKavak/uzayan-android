@@ -107,6 +107,7 @@ class TcpSocket(
                 "NotificationAction" -> actions.notificationAction(json)
                 "NotificationsRequest" -> actions.notificationsRequest()
                 "ImageThumbnailRequest" -> actions.imageThumbnailRequest(json)
+                "FileRequest" -> actions.fileRequest(json)
                 "FullSizeImageRequest" ->
                     if (prepareForLargeFile(ip)) actions.fullSizeImageRequest(json)
                 else -> {
