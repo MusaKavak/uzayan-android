@@ -44,6 +44,12 @@ class Actions(
         )
     }
 
+    fun fileSystemRequest(json: JSONObject){
+        fileManager.sendFileSystem(
+            json.getJSONObject("input").getString("path"),
+        )
+    }
+
     fun fileRequest(json: JSONObject) {
         fileManager.sendFile(
             json.getJSONObject("input").getString("path"),

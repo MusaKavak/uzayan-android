@@ -70,7 +70,7 @@ class TcpSocket(
                     val address = "${socket?.inetAddress?.hostName}:${socket.port}"
                     Log.w(tag, "New Tcp Socket Connection From: $address")
                     withContext(Dispatchers.IO) {
-                            val outputStream = socket.getOutputStream()
+                        val outputStream = socket.getOutputStream()
                         writerList.add(
                             WriterListObject(
                                 address,
@@ -87,11 +87,16 @@ class TcpSocket(
     }
 
     private fun listenForMessages(inputStream: InputStream, ip: String) {
-        BufferedReader(InputStreamReader(inputStream)).use { buffer ->
-            buffer.lineSequence().forEach { sequence ->
-                invoke(sequence, ip)
+        try {
+            BufferedReader(InputStreamReader(inputStream)).use { buffer ->
+                buffer.lineSequence().forEach { sequence ->
+                    invoke(sequence, ip)
+                }
             }
+        } catch (e: Exception) {
+            println(e.message)
         }
+
     }
 
     private fun invoke(input: String, ip: String) {
@@ -107,7 +112,9 @@ class TcpSocket(
                 "NotificationAction" -> actions.notificationAction(json)
                 "NotificationsRequest" -> actions.notificationsRequest()
                 "ImageThumbnailRequest" -> actions.imageThumbnailRequest(json)
-                "FileRequest" -> actions.fileRequest(json)
+                "FileSystemRequest" -> actions.fileSystemRequest(json)
+                "FileRequest" ->
+                    if (prepareForLargeFile(ip)) actions.fileRequest(json)
                 "FullSizeImageRequest" ->
                     if (prepareForLargeFile(ip)) actions.fullSizeImageRequest(json)
                 else -> {
