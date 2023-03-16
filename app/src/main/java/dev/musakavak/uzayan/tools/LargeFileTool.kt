@@ -1,10 +1,7 @@
 package dev.musakavak.uzayan.tools
 
 import dev.musakavak.uzayan.socket.TcpSocket
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import java.io.InputStream
 
 class LargeFileTool {
@@ -20,8 +17,10 @@ class LargeFileTool {
                             socket.stream.write(buffer)
                             socket.stream.flush()
                         }
-                        stream.close()
-                        socket.stream.close()
+                        delay(1000L)
+                        socket.stream.write("@@@".toByteArray())
+                        socket.stream.flush()
+
                     }
                 }
             }

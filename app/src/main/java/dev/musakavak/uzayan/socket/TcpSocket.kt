@@ -113,6 +113,7 @@ class TcpSocket(
                 "NotificationsRequest" -> actions.notificationsRequest()
                 "ImageThumbnailRequest" -> actions.imageThumbnailRequest(json)
                 "FileSystemRequest" -> actions.fileSystemRequest(json)
+                "CloseLargeFileStream" -> largeFileStream = null
                 "FileRequest" ->
                     if (prepareForLargeFile(ip)) actions.fileRequest(json)
                 "FullSizeImageRequest" ->
@@ -127,6 +128,7 @@ class TcpSocket(
     }
 
     private fun prepareForLargeFile(ip: String): Boolean {
+        if (largeFileStream?.ip == ip) return true
         val i = writerList.indexOfFirst { it.ip == ip }
 
         return if (i != -1) {
