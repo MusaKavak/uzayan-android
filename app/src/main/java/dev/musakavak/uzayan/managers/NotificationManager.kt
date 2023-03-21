@@ -1,26 +1,20 @@
 package dev.musakavak.uzayan.managers
 
-import android.app.Notification as AndroidNotification
 import android.content.Context
+import android.content.Intent
+import android.os.Bundle
 import android.service.notification.StatusBarNotification
+import android.util.Log
 import dev.musakavak.uzayan.models.Notification
 import dev.musakavak.uzayan.socket.TcpSocket
 import dev.musakavak.uzayan.tools.Base64Tool
+import android.app.Notification as AndroidNotification
 
-class NotificationManager(
-    private val context: Context,
-    _getCurrentNotifications: () -> Unit
-) {
+class NotificationManager(private val context: Context) {
     private val base64Tool = Base64Tool()
-
-    init {
-        getCurrentNotifications = _getCurrentNotifications
-    }
 
     companion object {
         private val currentNotificationActions = mutableListOf<NotificationAction>()
-        private var getCurrentNotifications: (() -> Unit)? = null
-
         fun sendAction(key: String, actionTitle: String) {
             currentNotificationActions
                 .firstOrNull { it.notificationKey == key }
@@ -28,10 +22,6 @@ class NotificationManager(
                 ?.firstOrNull { it.actionTitle == actionTitle }
                 ?.invoke
                 ?.let { it() }
-        }
-
-        fun syncNotifications() {
-            getCurrentNotifications?.let { it() }
         }
     }
 
@@ -57,13 +47,14 @@ class NotificationManager(
             if (!it.notification.extras.containsKey("android.mediaSession"))
                 notifications.add(createNotification(it))
         }
-        //Client.emit("Notifications", notifications)
+        TcpSocket.emit("Notifications", notifications)
     }
 
     fun sendRemoveNotification(key: String) {
         TcpSocket.emit("RemoveNotification", key)
     }
 
+    @Suppress("DEPRECATION")
     private fun createNotification(sbn: StatusBarNotification): Notification {
         val nf = sbn.notification
         val extras = nf.extras
@@ -72,9 +63,13 @@ class NotificationManager(
             sbn.key,
             base64Tool.fromIcon(nf.getLargeIcon(), context),
             sbn.packageName,
-            extras.getString("android.title"),
-            extras.getString("android.text"),
-            createNotificationActions(nf, sbn.key)
+            extras.getCharSequence("android.title").toString(),
+            extras.getCharSequence("android.text").toString(),
+            extras.getCharSequence("android.bigText").toString(),
+            createNotificationActions(nf, sbn.key),
+            extras.get("android.progressMax") as Int?,
+            extras.get("android.progress") as Int?,
+            sbn.isGroup
         )
     }
 
@@ -84,7 +79,9 @@ class NotificationManager(
             val actionTitles = mutableListOf<String>()
             nf.actions.forEach {
                 val title = it.title.toString()
-                actions.add(Action(title) { it.actionIntent.send() })
+                actions.add(Action(title) {
+                    it.actionIntent.send(context, 0, Intent())
+                })
                 actionTitles.add(title)
             }
             val na = NotificationAction(key, actions)
@@ -94,5 +91,18 @@ class NotificationManager(
             return actionTitles
         }
         return null
+    }
+
+    private fun printBundle(b: Bundle?) {
+        b?.let {
+            val s = b.keySet()
+            Log.e("Tagg", "---------------------------------")
+            s.forEach {
+                Log.i(
+                    "Tagg",
+                    "Key: $it, Value: ${b.get(it)}, Type: ${b.get(it)?.javaClass?.canonicalName}"
+                )
+            }
+        }
     }
 }

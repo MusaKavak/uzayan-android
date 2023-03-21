@@ -5,6 +5,7 @@ import dev.musakavak.uzayan.managers.FileManager
 import dev.musakavak.uzayan.managers.ImageManager
 import dev.musakavak.uzayan.managers.MediaSessionManager
 import dev.musakavak.uzayan.managers.NotificationManager
+import dev.musakavak.uzayan.services.NLService
 import org.json.JSONObject
 
 class Actions(
@@ -34,7 +35,7 @@ class Actions(
     }
 
     fun notificationsRequest() {
-        NotificationManager.syncNotifications()
+        NLService.sendActiveNotifications()
     }
 
     fun imageThumbnailRequest(json: JSONObject) {
@@ -44,7 +45,7 @@ class Actions(
         )
     }
 
-    fun fileSystemRequest(json: JSONObject){
+    fun fileSystemRequest(json: JSONObject) {
         fileManager.sendFileSystem(
             json.getJSONObject("input").getString("path"),
         )

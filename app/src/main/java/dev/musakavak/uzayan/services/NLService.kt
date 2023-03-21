@@ -5,12 +5,20 @@ import android.service.notification.StatusBarNotification
 import dev.musakavak.uzayan.managers.NotificationManager
 
 class NLService : NotificationListenerService() {
+
+    companion object {
+        var sendActiveNotifications: (() -> Unit) = {}
+    }
+
     private var notificationManager: NotificationManager? = null
 
     override fun onListenerConnected() {
         super.onListenerConnected()
 
-        notificationManager = NotificationManager(applicationContext) { this.sendNotifications() }
+        notificationManager = NotificationManager(applicationContext)
+        sendActiveNotifications = {
+            notificationManager?.sendNotificationList(activeNotifications)
+        }
         println("Notification Lıstener Connected")
     }
 

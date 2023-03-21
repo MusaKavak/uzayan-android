@@ -7,5 +7,9 @@ data class Notification(
     val packageName: String?,
     val title: String?,
     val text: String?,
-    val actions: List<String>?
+    val bigText: String?,
+    val actions: List<String>?,
+    val progressMax: Int?,
+    val process: Int?,
+    val isGroup: Boolean?,
 )
