@@ -1,7 +1,10 @@
 package dev.musakavak.uzayan.tools
 
 import dev.musakavak.uzayan.socket.TcpSocket
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.InputStream
 
 class LargeFileTool {
@@ -13,14 +16,14 @@ class LargeFileTool {
                 _stream?.let { stream ->
                     TcpSocket.largeFileStream?.let { socket ->
                         val buffer = ByteArray(chunkSize)
-                        while (stream.read(buffer) != -1) {
-                            socket.stream.write(buffer)
+                        var totalBytesRead = 0
+                        while (true) {
+                            val bytesRead = stream.read(buffer)
+                            if (bytesRead == -1) break
+                            totalBytesRead += bytesRead
+                            socket.stream.write(buffer, 0, bytesRead)
                             socket.stream.flush()
                         }
-                        delay(1000L)
-                        socket.stream.write("@@@".toByteArray())
-                        socket.stream.flush()
-
                     }
                 }
             }
