@@ -65,7 +65,7 @@ class ImageManager(private val context: Context) {
         )
         return ImageThumbnail(
             id.toString(),
-            imageTool.fromBitmap(thumbnail, 100),
+            imageTool.fromBitmap(thumbnail),
             name,
             cursor.position,
             date

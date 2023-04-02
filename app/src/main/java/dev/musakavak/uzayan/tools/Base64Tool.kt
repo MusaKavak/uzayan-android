@@ -10,10 +10,10 @@ import java.io.ByteArrayOutputStream
 class Base64Tool {
 
 
-    fun fromBitmap(bitmap: Bitmap?, quality: Int): String? {
+    fun fromBitmap(bitmap: Bitmap?): String? {
         bitmap?.let {
             val byteArrayOutputStream = ByteArrayOutputStream()
-            bitmap.compress(Bitmap.CompressFormat.JPEG, quality, byteArrayOutputStream)
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream)
             val byteArray = byteArrayOutputStream.toByteArray()
             return Base64.encodeToString(byteArray, Base64.NO_WRAP)
         }
@@ -23,7 +23,7 @@ class Base64Tool {
     fun fromIcon(icon: Icon?, context: Context): String? {
         icon?.let {
             val bitmap = it.loadDrawable(context)?.toBitmap()
-            return this.fromBitmap(bitmap, 50)
+            return this.fromBitmap(bitmap)
         }
         return null
     }

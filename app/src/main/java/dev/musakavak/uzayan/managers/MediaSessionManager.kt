@@ -114,7 +114,6 @@ class MediaSessionManager(context: Context) {
         return MediaSession(
             imageTool.fromBitmap(
                 controller.metadata?.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART),
-                70
             ),
             controller.metadata?.getText(MediaMetadata.METADATA_KEY_ARTIST).toString(),
             controller.metadata?.getText(MediaMetadata.METADATA_KEY_ALBUM).toString(),
