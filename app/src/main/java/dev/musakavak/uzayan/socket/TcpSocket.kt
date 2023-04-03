@@ -11,42 +11,39 @@ import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.InputStream
 import java.io.InputStreamReader
-import java.io.OutputStream
 import java.io.PrintWriter
 import java.net.InetSocketAddress
 import java.net.ServerSocket
+import java.net.Socket
 
 class TcpSocket(
     private val actions: Actions
 ) {
+    private val MAIN_STREAM = 200
+    private val FILE_STREAM = 201
 
     private var socketServer: ServerSocket? = null
     private val tag = "TcpSocketServer"
 
     companion object {
         private val gson = Gson()
-        private var writerList = mutableListOf<WriterListObject>()
-        var largeFileStream: WriterListObject? = null
         var socketPort: Int? = null
+
+        var fileStream: Socket? = null
+        private var mainStreamWriter: PrintWriter? = null
 
         private val scope = CoroutineScope(Dispatchers.IO)
         fun <T> emit(event: String, input: T) {
             scope.launch {
                 withContext(Dispatchers.IO) {
-                    writerList.forEach {
+                    mainStreamWriter?.let {
                         val message = gson.toJson(ConnectionObject(event, input))
-                        it.writer.println(message)
-                        it.writer.flush()
+                        it.println(message)
+                        it.flush()
                     }
                 }
             }
         }
-
-        data class WriterListObject(
-            val ip: String,
-            val writer: PrintWriter,
-            val stream: OutputStream
-        )
     }
 
     suspend fun initializeSocketServer() {
@@ -69,28 +66,39 @@ class TcpSocket(
                 scope.launch {
                     val address = "${socket?.inetAddress?.hostName}:${socket.port}"
                     Log.w(tag, "New Tcp Socket Connection From: $address")
-                    withContext(Dispatchers.IO) {
-                        val outputStream = socket.getOutputStream()
-                        writerList.add(
-                            WriterListObject(
-                                address,
-                                PrintWriter(outputStream),
-                                outputStream
-                            )
-                        )
-                        listenForMessages(socket.getInputStream(), address)
-                    }
+                    handleConnection(socket)
                     Log.w(tag, "Tcp Socket From: $address Is Disconnected")
                 }
             }
         }
     }
 
-    private fun listenForMessages(inputStream: InputStream, ip: String) {
+    private suspend fun handleConnection(socket: Socket) {
+        withContext(Dispatchers.IO) {
+            try {
+                val inputStream = socket.getInputStream()
+                val streamType = inputStream.read()
+                if (streamType == MAIN_STREAM) {
+                    mainStreamWriter = PrintWriter(socket.getOutputStream())
+                    listenForMessages(inputStream, ::mainStreamActions)
+                }
+                if (streamType == FILE_STREAM) {
+                    fileStream = socket
+                    listenForMessages(inputStream, ::fileStreamActions)
+                }
+            } catch (e: Exception) {
+                println(e.message)
+            }
+        }
+    }
+
+    private fun listenForMessages(inputStream: InputStream, actions: (json: JSONObject) -> Unit) {
         try {
             BufferedReader(InputStreamReader(inputStream)).use { buffer ->
                 buffer.lineSequence().forEach { sequence ->
-                    invoke(sequence, ip)
+                    val json = JSONObject(sequence)
+                    println("New Message:  " + json.get("message"))
+                    actions(json)
                 }
             }
         } catch (e: Exception) {
@@ -99,43 +107,30 @@ class TcpSocket(
 
     }
 
-    private fun invoke(input: String, ip: String) {
-        try {
-            val json = JSONObject(input)
-            println("Received Packet With Message:  " + json.get("message"))
-
-            when (json.get("message")) {
-                "TestConnection" -> emit("TestConnection", null)
-                "Pair" -> actions.pair(json)
-                "MediaSessionControl" -> actions.mediaSessionControl(json)
-                "MediaSessionsRequest" -> actions.mediaSessionRequest()
-                "NotificationAction" -> actions.notificationAction(json)
-                "NotificationsRequest" -> actions.notificationsRequest()
-                "ImageThumbnailRequest" -> actions.imageThumbnailRequest(json)
-                "FileSystemRequest" -> actions.fileSystemRequest(json)
-                "CloseLargeFileStream" -> largeFileStream = null
-                "FileRequest" ->
-                    if (prepareForLargeFile(ip)) actions.fileRequest(json)
-                "FullSizeImageRequest" ->
-                    if (prepareForLargeFile(ip)) actions.fullSizeImageRequest(json)
-                else -> {
-                    println("Message Not Found")
-                }
+    private fun mainStreamActions(json: JSONObject) {
+        when (json.get("message")) {
+            "TestConnection" -> emit("TestConnection", null)
+            "Pair" -> actions.pair(json)
+            "MediaSessionControl" -> actions.mediaSessionControl(json)
+            "MediaSessionsRequest" -> actions.mediaSessionRequest()
+            "NotificationAction" -> actions.notificationAction(json)
+            "NotificationsRequest" -> actions.notificationsRequest()
+            "ImageThumbnailRequest" -> actions.imageThumbnailRequest(json)
+            "FileSystemRequest" -> actions.fileSystemRequest(json)
+            else -> {
+                println("Message Not Found")
             }
-        } catch (e: Exception) {
-            Log.e(tag, "Error: ", e)
         }
     }
 
-    private fun prepareForLargeFile(ip: String): Boolean {
-        if (largeFileStream?.ip == ip) return true
-        val i = writerList.indexOfFirst { it.ip == ip }
-
-        return if (i != -1) {
-            largeFileStream = writerList[i]
-            writerList.removeAt(i)
-            true
-        } else false
+    private fun fileStreamActions(json: JSONObject) {
+        when (json.get("message")) {
+            "CloseLargeFileStream" -> {
+                fileStream?.close()
+                fileStream = null
+            }
+            "FileRequest" -> actions.fileRequest(json)
+            "FullSizeImageRequest" -> actions.fullSizeImageRequest(json)
+        }
     }
-
 }
