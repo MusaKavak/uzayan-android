@@ -15,7 +15,8 @@ class ImageManager(private val context: Context) {
     private val projection = arrayOf(
         MediaStore.Images.Media._ID,
         MediaStore.Images.Media.DISPLAY_NAME,
-        MediaStore.Images.Media.DATE_ADDED
+        MediaStore.Images.Media.DATE_ADDED,
+        MediaStore.Images.Media.SIZE
     )
     private val imageTool = Base64Tool()
     private val largeFileTool = LargeFileTool()
@@ -58,6 +59,10 @@ class ImageManager(private val context: Context) {
             cursor.getLong(
                 cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_ADDED)
             )
+        val size =
+            cursor.getLong(
+                cursor.getColumnIndexOrThrow(MediaStore.Images.Media.SIZE)
+            )
 
         val thumbnail = contentResolver.loadThumbnail(
             getUri(id),
@@ -68,7 +73,8 @@ class ImageManager(private val context: Context) {
             imageTool.fromBitmap(thumbnail),
             name,
             cursor.position,
-            date
+            date,
+            size
         )
     }
 

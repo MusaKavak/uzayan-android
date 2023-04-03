@@ -5,5 +5,6 @@ data class ImageThumbnail(
     val value: String?,
     val name: String?,
     val index: Int?,
-    val date: Long?
+    val date: Long?,
+    val size: Long
 )
