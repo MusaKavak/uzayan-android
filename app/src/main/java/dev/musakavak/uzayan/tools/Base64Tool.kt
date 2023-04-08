@@ -10,10 +10,11 @@ import java.io.ByteArrayOutputStream
 class Base64Tool {
 
 
+    @Suppress("DEPRECATION")
     fun fromBitmap(bitmap: Bitmap?): String? {
         bitmap?.let {
             val byteArrayOutputStream = ByteArrayOutputStream()
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream)
+            bitmap.compress(Bitmap.CompressFormat.WEBP, 70, byteArrayOutputStream)
             val byteArray = byteArrayOutputStream.toByteArray()
             return Base64.encodeToString(byteArray, Base64.NO_WRAP)
         }
