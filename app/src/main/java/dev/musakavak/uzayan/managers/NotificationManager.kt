@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.service.notification.StatusBarNotification
-import android.util.Log
 import dev.musakavak.uzayan.models.Notification
 import dev.musakavak.uzayan.socket.TcpSocket
 import dev.musakavak.uzayan.tools.Base64Tool
@@ -59,18 +58,25 @@ class NotificationManager(private val context: Context) {
         val nf = sbn.notification
         val extras = nf.extras
         return Notification(
-            extras.getString("android.infoText"),
             sbn.key,
-            base64Tool.fromIcon(nf.getLargeIcon(), context),
             sbn.packageName,
-            extras.getCharSequence("android.title").toString(),
-            extras.getCharSequence("android.text").toString(),
-            extras.getCharSequence("android.bigText").toString(),
+            getStringFromExtras(extras, "android.title"),
+            getStringFromExtras(extras, "android.text"),
+            getStringFromExtras(extras, "android.bigText"),
+            getStringFromExtras(extras, "android.infoText"),
+            base64Tool.fromIcon(nf.getLargeIcon(), context),
             createNotificationActions(nf, sbn.key),
+            sbn.isGroup,
             extras.get("android.progressMax") as Int?,
             extras.get("android.progress") as Int?,
-            sbn.isGroup
         )
+    }
+
+    private fun getStringFromExtras(extras: Bundle, key: String): String? {
+        extras.getCharSequence(key)?.let {
+            if (it.isNotBlank()) return it.toString()
+        }
+        return null
     }
 
     private fun createNotificationActions(nf: AndroidNotification, key: String): List<String>? {
@@ -93,16 +99,16 @@ class NotificationManager(private val context: Context) {
         return null
     }
 
-    private fun printBundle(b: Bundle?) {
-        b?.let {
-            val s = b.keySet()
-            Log.e("Tagg", "---------------------------------")
-            s.forEach {
-                Log.i(
-                    "Tagg",
-                    "Key: $it, Value: ${b.get(it)}, Type: ${b.get(it)?.javaClass?.canonicalName}"
-                )
-            }
-        }
-    }
+//    private fun printBundle(b: Bundle?) {
+//        b?.let {
+//            val s = b.keySet()
+//            Log.e("Tag", "---------------------------------")
+//            s.forEach {
+//                Log.i(
+//                    "Tag",
+//                    "Key: $it, Value: ${b.get(it)}, Type: ${b.get(it)?.javaClass?.canonicalName}"
+//                )
+//            }
+//        }
+//    }
 }
