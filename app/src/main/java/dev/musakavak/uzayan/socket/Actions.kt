@@ -57,6 +57,19 @@ class Actions(
         )
     }
 
+    fun deleteFileRequest(json: JSONObject) {
+        fileManager.deleteFile(
+            json.getJSONObject("input").getString("path"),
+        )
+    }
+
+    fun moveFileRequest(json: JSONObject) {
+        fileManager.moveFile(
+            json.getJSONObject("input").getString("source"),
+            json.getJSONObject("input").getString("target"),
+        )
+    }
+
     fun fullSizeImageRequest(json: JSONObject) {
         imageManager.sendFullSizeImage(
             json.getJSONObject("input").getString("id"),

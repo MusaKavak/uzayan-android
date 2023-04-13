@@ -117,6 +117,8 @@ class TcpSocket(
             "NotificationsRequest" -> actions.notificationsRequest()
             "ImageThumbnailRequest" -> actions.imageThumbnailRequest(json)
             "FileSystemRequest" -> actions.fileSystemRequest(json)
+            "DeleteFileRequest" -> actions.deleteFileRequest(json)
+            "MoveFileRequest" -> actions.moveFileRequest(json)
             else -> {
                 println("Message Not Found")
             }

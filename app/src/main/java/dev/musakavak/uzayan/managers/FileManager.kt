@@ -4,6 +4,7 @@ import android.os.Environment
 import dev.musakavak.uzayan.socket.TcpSocket
 import dev.musakavak.uzayan.tools.LargeFileTool
 import java.io.File
+import kotlin.io.path.moveTo
 import dev.musakavak.uzayan.models.File as ModelFile
 
 class FileManager {
@@ -30,6 +31,25 @@ class FileManager {
             fileToSend.canRead()
         ) {
             largeFileTool.sendWithInputStream(fileToSend.inputStream())
+        }
+    }
+
+    fun deleteFile(path: String) {
+        val fileToDelete = File(path)
+        if (fileToDelete.exists() &&
+            fileToDelete.isFile
+        ) {
+            fileToDelete.delete()
+            fileToDelete.parent?.let { sendFileSystem(it) }
+        }
+    }
+
+    fun moveFile(sourcePath: String, targetPath: String) {
+        val source = File(sourcePath)
+        if (source.exists() && source.isFile) {
+            val targetFile = File(targetPath)
+            source.toPath().moveTo(targetFile.toPath(), false)
+            targetFile.parent?.let { sendFileSystem(it) }
         }
     }
 
