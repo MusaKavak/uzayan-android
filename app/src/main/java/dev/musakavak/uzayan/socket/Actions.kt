@@ -1,18 +1,17 @@
 package dev.musakavak.uzayan.socket
 
 import android.content.SharedPreferences
-import dev.musakavak.uzayan.managers.FileManager
-import dev.musakavak.uzayan.managers.ImageManager
-import dev.musakavak.uzayan.managers.MediaSessionManager
-import dev.musakavak.uzayan.managers.NotificationManager
+import dev.musakavak.uzayan.managers.*
 import dev.musakavak.uzayan.services.NLService
 import org.json.JSONObject
+import java.net.Socket
 
 class Actions(
     private val shp: SharedPreferences,
     private val mediaSessionManager: MediaSessionManager,
     private val imageManager: ImageManager,
-    private val fileManager: FileManager
+    private val fileManager: FileManager,
+    private val fileTransferManager: FileTransferManager
 ) {
 
     fun mediaSessionControl(json: JSONObject) {
@@ -73,6 +72,14 @@ class Actions(
     fun fullSizeImageRequest(json: JSONObject) {
         imageManager.sendFullSizeImage(
             json.getJSONObject("input").getString("id"),
+        )
+    }
+
+    suspend fun createFile(json: JSONObject, socket: Socket) {
+        fileTransferManager.createFile(
+            json.getString("path"),
+            json.getLong("size"),
+            socket
         )
     }
 

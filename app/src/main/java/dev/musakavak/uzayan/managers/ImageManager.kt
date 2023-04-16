@@ -9,7 +9,6 @@ import android.util.Size
 import dev.musakavak.uzayan.models.ImageThumbnail
 import dev.musakavak.uzayan.socket.TcpSocket
 import dev.musakavak.uzayan.tools.Base64Tool
-import dev.musakavak.uzayan.tools.LargeFileTool
 
 class ImageManager(private val context: Context) {
     private val projection = arrayOf(
@@ -19,7 +18,6 @@ class ImageManager(private val context: Context) {
         MediaStore.Images.Media.SIZE
     )
     private val imageTool = Base64Tool()
-    private val largeFileTool = LargeFileTool()
     private val contentResolver = context.contentResolver
 
     fun sendSlice(start: Int?, length: Int?) {
@@ -39,7 +37,7 @@ class ImageManager(private val context: Context) {
         id.toLongOrNull()?.let {
             val uri = getUri(it)
             val inputStream = context.contentResolver.openInputStream(uri)
-            largeFileTool.sendWithInputStream(inputStream)
+            // largeFileTool.sendWithInputStream(inputStream)
         }
     }
 

@@ -8,11 +8,14 @@ import android.content.Context
 import android.content.Intent
 import android.os.IBinder
 import dev.musakavak.uzayan.managers.FileManager
+import dev.musakavak.uzayan.managers.FileTransferManager
 import dev.musakavak.uzayan.managers.ImageManager
 import dev.musakavak.uzayan.managers.MediaSessionManager
 import dev.musakavak.uzayan.socket.Actions
 import dev.musakavak.uzayan.socket.TcpSocket
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class UzayanForegroundService : Service() {
     private val channelId = "uzayan"
@@ -39,6 +42,7 @@ class UzayanForegroundService : Service() {
         val shp = getSharedPreferences("UzayanConnection", MODE_PRIVATE)
         val mediaSessionManager = MediaSessionManager(this)
         val fileManager = FileManager()
+        val fileTransferManager = FileTransferManager()
         mediaSessionManager.listen()
         val imageManager = ImageManager(this)
         CoroutineScope(Dispatchers.IO).launch {
@@ -47,7 +51,8 @@ class UzayanForegroundService : Service() {
                     shp,
                     mediaSessionManager,
                     imageManager,
-                    fileManager
+                    fileManager,
+                    fileTransferManager
                 )
             ).initializeSocketServer()
         }

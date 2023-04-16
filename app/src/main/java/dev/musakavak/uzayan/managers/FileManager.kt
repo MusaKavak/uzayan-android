@@ -2,14 +2,12 @@ package dev.musakavak.uzayan.managers
 
 import android.os.Environment
 import dev.musakavak.uzayan.socket.TcpSocket
-import dev.musakavak.uzayan.tools.LargeFileTool
 import java.io.File
 import kotlin.io.path.moveTo
 import dev.musakavak.uzayan.models.File as ModelFile
 
 class FileManager {
 
-    private val largeFileTool = LargeFileTool()
     private var externalStoragePath: String? = null
     fun sendFileSystem(path: String) {
         val fileSystemToSend: ModelFile = if (path.isNotEmpty() && path != externalStoragePath) {
@@ -30,7 +28,7 @@ class FileManager {
             fileToSend.isFile &&
             fileToSend.canRead()
         ) {
-            largeFileTool.sendWithInputStream(fileToSend.inputStream())
+            //largeFileTool.sendWithInputStream(fileToSend.inputStream())
         }
     }
 
@@ -74,7 +72,7 @@ class FileManager {
             fileToSend.isFile,
             fileToSend.isHidden,
             fileToSend.length(),
-            null,
+            false,
             null,
             null
         )

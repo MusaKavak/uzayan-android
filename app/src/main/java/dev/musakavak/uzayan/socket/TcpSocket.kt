@@ -20,8 +20,8 @@ class TcpSocket(
     private val actions: Actions
 ) {
     private val MAIN_STREAM = 200
-    private val FILE_STREAM = 201
-
+    private val FILE_OUTPUT_STREAM = 201
+    private val FILE_INPUT_STREAM = 202
     private var socketServer: ServerSocket? = null
     private val tag = "TcpSocketServer"
 
@@ -74,21 +74,23 @@ class TcpSocket(
     }
 
     private suspend fun handleConnection(socket: Socket) {
-        withContext(Dispatchers.IO) {
-            try {
-                val inputStream = socket.getInputStream()
-                val streamType = inputStream.read()
-                if (streamType == MAIN_STREAM) {
-                    mainStreamWriter = PrintWriter(socket.getOutputStream())
-                    listenForMessages(inputStream, ::mainStreamActions)
-                }
-                if (streamType == FILE_STREAM) {
-                    fileStream = socket
-                    listenForMessages(inputStream, ::fileStreamActions)
-                }
-            } catch (e: Exception) {
-                println(e.message)
+        try {
+            val inputStream = socket.getInputStream()
+            val streamType = inputStream.read()
+            if (streamType == MAIN_STREAM) {
+                mainStreamWriter = PrintWriter(socket.getOutputStream())
+                listenForMessages(inputStream, ::mainStreamActions)
             }
+            if (streamType == FILE_OUTPUT_STREAM) {
+                fileStream = socket
+                listenForMessages(inputStream, ::fileOutputActions)
+            }
+            if (streamType == FILE_INPUT_STREAM) {
+                listenForFiles(socket)
+            }
+        } catch (e: Exception) {
+            println(e.message)
+
         }
     }
 
@@ -125,14 +127,28 @@ class TcpSocket(
         }
     }
 
-    private fun fileStreamActions(json: JSONObject) {
+    private fun fileOutputActions(json: JSONObject) {
         when (json.get("message")) {
             "CloseLargeFileStream" -> {
                 fileStream?.close()
                 fileStream = null
             }
+
             "FileRequest" -> actions.fileRequest(json)
             "FullSizeImageRequest" -> actions.fullSizeImageRequest(json)
+        }
+    }
+
+    private suspend fun listenForFiles(socket: Socket) = withContext(Dispatchers.IO) {
+        try {
+            while (true) {
+                val message =
+                    BufferedReader(InputStreamReader(socket.getInputStream())).readLine()
+                if (message == "done") break
+                actions.createFile(JSONObject(message), socket)
+            }
+        } catch (e: Exception) {
+            println(e.message)
         }
     }
 }
