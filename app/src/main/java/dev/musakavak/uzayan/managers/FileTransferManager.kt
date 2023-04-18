@@ -1,14 +1,13 @@
 package dev.musakavak.uzayan.managers
 
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
-import java.net.Socket
+import java.io.InputStream
+import java.io.OutputStream
 
 class FileTransferManager {
     private val chunkSize = 4096
-    private val scope = CoroutineScope(Dispatchers.IO)
 
     fun sendFile(file: File) {
         try {
@@ -32,34 +31,33 @@ class FileTransferManager {
         }
     }
 
-    suspend fun createFile(path: String, size: Long, socket: Socket) = withContext(Dispatchers.IO) {
-        try {
-            val out = socket.getOutputStream()
-            val fileToCreate = File(path)
-            if (fileToCreate.exists()) out.write(103)
-            else {
-                val status = fileToCreate.createNewFile()
-                if (status) {
-                    if (!fileToCreate.canWrite()) out.write(102)
-                    else {
-                        val socketInput = socket.getInputStream()
-                        val fileOutput = fileToCreate.outputStream()
-                        val buffer = ByteArray(chunkSize)
-                        var allReceivedBytes = 0
-                        out.write(100)
-                        while (allReceivedBytes <= size) {
-                            val receivedBytes = socketInput.read(buffer)
-                            if (receivedBytes == 0) break
-                            println("Received $receivedBytes bytes")
-                            fileOutput.write(buffer, 0, receivedBytes)
-                            allReceivedBytes += receivedBytes
+    suspend fun createFile(path: String, size: Long, input: InputStream, output: OutputStream) =
+        withContext(Dispatchers.IO) {
+            try {
+                val fileToCreate = File(path)
+                if (fileToCreate.exists()) output.write(103)
+                else {
+                    val status = fileToCreate.createNewFile()
+                    if (status) {
+                        if (!fileToCreate.canWrite()) output.write(102)
+                        else {
+                            val fileOutput = fileToCreate.outputStream()
+                            val buffer = ByteArray(chunkSize)
+                            var allReceivedBytes: Long = 0
+                            output.write(100)
+                            while (true) {
+                                val receivedBytes = input.read(buffer)
+                                fileOutput.write(buffer, 0, receivedBytes)
+                                allReceivedBytes += receivedBytes
+                                if (allReceivedBytes == size) break
+                            }
+                            fileOutput.close()
                         }
-                        fileOutput.close()
                     }
                 }
+                output.write(99)
+            } catch (e: Exception) {
+                println(e)
             }
-        } catch (e: Exception) {
-            println(e)
         }
-    }
 }

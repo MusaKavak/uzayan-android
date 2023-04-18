@@ -1,10 +1,15 @@
 package dev.musakavak.uzayan.socket
 
 import android.content.SharedPreferences
-import dev.musakavak.uzayan.managers.*
+import dev.musakavak.uzayan.managers.FileManager
+import dev.musakavak.uzayan.managers.FileTransferManager
+import dev.musakavak.uzayan.managers.ImageManager
+import dev.musakavak.uzayan.managers.MediaSessionManager
+import dev.musakavak.uzayan.managers.NotificationManager
 import dev.musakavak.uzayan.services.NLService
 import org.json.JSONObject
-import java.net.Socket
+import java.io.InputStream
+import java.io.OutputStream
 
 class Actions(
     private val shp: SharedPreferences,
@@ -75,11 +80,12 @@ class Actions(
         )
     }
 
-    suspend fun createFile(json: JSONObject, socket: Socket) {
+    suspend fun createFile(json: JSONObject, input: InputStream, output: OutputStream) {
         fileTransferManager.createFile(
             json.getString("path"),
             json.getLong("size"),
-            socket
+            input,
+            output
         )
     }
 

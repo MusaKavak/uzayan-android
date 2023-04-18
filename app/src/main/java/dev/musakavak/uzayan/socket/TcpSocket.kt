@@ -141,11 +141,13 @@ class TcpSocket(
 
     private suspend fun listenForFiles(socket: Socket) = withContext(Dispatchers.IO) {
         try {
+            val input = socket.getInputStream()
+            val output = socket.getOutputStream()
             while (true) {
                 val message =
-                    BufferedReader(InputStreamReader(socket.getInputStream())).readLine()
+                    BufferedReader(InputStreamReader(input)).readLine()
                 if (message == "done") break
-                actions.createFile(JSONObject(message), socket)
+                actions.createFile(JSONObject(message), input, output)
             }
         } catch (e: Exception) {
             println(e.message)
