@@ -10,7 +10,7 @@ import dev.musakavak.uzayan.models.ImageThumbnail
 import dev.musakavak.uzayan.socket.TcpSocket
 import dev.musakavak.uzayan.tools.Base64Tool
 
-class ImageManager(private val context: Context) {
+class ImageTransferManager(private val context: Context) {
     private val projection = arrayOf(
         MediaStore.Images.Media._ID,
         MediaStore.Images.Media.DISPLAY_NAME,

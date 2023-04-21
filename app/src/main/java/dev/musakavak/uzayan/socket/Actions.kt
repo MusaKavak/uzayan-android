@@ -3,24 +3,24 @@ package dev.musakavak.uzayan.socket
 import android.content.SharedPreferences
 import dev.musakavak.uzayan.managers.FileManager
 import dev.musakavak.uzayan.managers.FileTransferManager
-import dev.musakavak.uzayan.managers.ImageManager
-import dev.musakavak.uzayan.managers.MediaSessionManager
-import dev.musakavak.uzayan.managers.NotificationManager
+import dev.musakavak.uzayan.managers.ImageTransferManager
+import dev.musakavak.uzayan.managers.MediaSessionTransferManager
+import dev.musakavak.uzayan.managers.NotificationTransferManager
 import dev.musakavak.uzayan.services.NLService
 import org.json.JSONObject
 import java.io.InputStream
 import java.io.OutputStream
 
-class Actions(
+class imageManagerActions(
     private val shp: SharedPreferences,
-    private val mediaSessionManager: MediaSessionManager,
-    private val imageManager: ImageManager,
+    private val mediaSessionTransferManager: MediaSessionTransferManager,
+    private val imageTransferManager: ImageTransferManager,
     private val fileManager: FileManager,
     private val fileTransferManager: FileTransferManager
 ) {
 
     fun mediaSessionControl(json: JSONObject) {
-        mediaSessionManager.mediaSessionControl(
+        mediaSessionTransferManager.mediaSessionControl(
             json.getJSONObject("input").getString("token"),
             json.getJSONObject("input").getString("action"),
             json.getJSONObject("input").get("value"),
@@ -28,11 +28,11 @@ class Actions(
     }
 
     fun mediaSessionRequest() {
-        mediaSessionManager.sendCurrentSessions()
+        mediaSessionTransferManager.sendCurrentSessions()
     }
 
     fun notificationAction(json: JSONObject) {
-        NotificationManager.sendAction(
+        NotificationTransferManager.sendAction(
             json.getJSONObject("input").getString("key"),
             json.getJSONObject("input").getString("action")
         )
@@ -43,7 +43,7 @@ class Actions(
     }
 
     fun imageThumbnailRequest(json: JSONObject) {
-        imageManager.sendSlice(
+        imageTransferManager.sendSlice(
             json.getJSONObject("input").getInt("start"),
             json.getJSONObject("input").getInt("length"),
         )
@@ -75,7 +75,7 @@ class Actions(
     }
 
     fun fullSizeImageRequest(json: JSONObject) {
-        imageManager.sendFullSizeImage(
+        imageTransferManager.sendFullSizeImage(
             json.getJSONObject("input").getString("id"),
         )
     }

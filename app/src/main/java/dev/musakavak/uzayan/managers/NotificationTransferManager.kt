@@ -9,7 +9,7 @@ import dev.musakavak.uzayan.socket.TcpSocket
 import dev.musakavak.uzayan.tools.Base64Tool
 import android.app.Notification as AndroidNotification
 
-class NotificationManager(private val context: Context) {
+class NotificationTransferManager(private val context: Context) {
     private val base64Tool = Base64Tool()
 
     companion object {

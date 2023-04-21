@@ -2,7 +2,7 @@ package dev.musakavak.uzayan.services
 
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
-import dev.musakavak.uzayan.managers.NotificationManager
+import dev.musakavak.uzayan.managers.NotificationTransferManager
 
 class NLService : NotificationListenerService() {
 
@@ -10,12 +10,12 @@ class NLService : NotificationListenerService() {
         var sendActiveNotifications: (() -> Unit) = {}
     }
 
-    private var notificationManager: NotificationManager? = null
+    private var notificationManager: NotificationTransferManager? = null
 
     override fun onListenerConnected() {
         super.onListenerConnected()
 
-        notificationManager = NotificationManager(applicationContext)
+        notificationManager = NotificationTransferManager(applicationContext)
         sendActiveNotifications = {
             notificationManager?.sendNotificationList(activeNotifications)
         }

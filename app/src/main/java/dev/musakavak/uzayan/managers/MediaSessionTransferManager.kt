@@ -13,7 +13,7 @@ import dev.musakavak.uzayan.services.NLService
 import dev.musakavak.uzayan.socket.TcpSocket
 import dev.musakavak.uzayan.tools.Base64Tool
 
-class MediaSessionManager(context: Context) {
+class MediaSessionTransferManager(context: Context) {
     private val manager: MediaSessionManager =
         context.getSystemService(Context.MEDIA_SESSION_SERVICE) as MediaSessionManager
     private val componentName = ComponentName(context, NLService::class.java)
