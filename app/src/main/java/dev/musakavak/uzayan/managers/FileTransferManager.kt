@@ -1,6 +1,9 @@
 package dev.musakavak.uzayan.managers
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.InputStream
@@ -31,33 +34,48 @@ class FileTransferManager {
         }
     }
 
-    suspend fun createFile(path: String, size: Long, input: InputStream, output: OutputStream) =
-        withContext(Dispatchers.IO) {
-            try {
-                val fileToCreate = File(path)
-                if (fileToCreate.exists()) output.write(103)
-                else {
-                    val status = fileToCreate.createNewFile()
-                    if (status) {
-                        if (!fileToCreate.canWrite()) output.write(102)
-                        else {
-                            val fileOutput = fileToCreate.outputStream()
-                            val buffer = ByteArray(chunkSize)
-                            var allReceivedBytes: Long = 0
-                            output.write(100)
-                            while (true) {
-                                val receivedBytes = input.read(buffer)
-                                fileOutput.write(buffer, 0, receivedBytes)
-                                allReceivedBytes += receivedBytes
-                                if (allReceivedBytes == size) break
-                            }
-                            fileOutput.close()
-                        }
-                    }
-                }
-                output.write(99)
-            } catch (e: Exception) {
-                println(e)
+    suspend fun createFile(
+        path: String,
+        size: Long,
+        input: InputStream,
+        output: OutputStream,
+    ) = withContext(Dispatchers.IO) {
+        try {
+            val fileToCreate = File(path)
+            if (fileToCreate.exists()) {
+                output.write(101)
+                return@withContext
             }
+            fileToCreate.createNewFile()
+            if (!fileToCreate.canWrite()) {
+                output.write(102)
+                return@withContext
+            }
+            val fileOutput = fileToCreate.outputStream()
+            val buffer = ByteArray(chunkSize)
+            var bytesReceived: Long = 0
+            output.write(100)
+
+            val progressTracker = launch(Dispatchers.IO) {
+                while (true) {
+                    println("Progress = ${bytesReceived.toFloat() / size * 100}")
+                    if (bytesReceived >= size) break
+                    delay(1000L)
+                }
+            }
+
+            while (true) {
+                val bytesRead = input.read(buffer)
+                fileOutput.write(buffer, 0, bytesRead)
+                bytesReceived += bytesRead
+                if (bytesReceived >= size) break
+            }
+
+            fileOutput.close()
+            progressTracker.cancelAndJoin()
+            output.write(99)
+        } catch (e: Exception) {
+            println(e)
         }
+    }
 }
