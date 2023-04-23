@@ -16,6 +16,7 @@ import dev.musakavak.uzayan.socket.TcpSocket
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import dev.musakavak.uzayan.managers.NotificationManager as UznNotificationManager
 
 class UzayanForegroundService : Service() {
     private val channelId = "uzayan"
@@ -40,6 +41,7 @@ class UzayanForegroundService : Service() {
 
     override fun onCreate() {
         val shp = getSharedPreferences("UzayanConnection", MODE_PRIVATE)
+        val notificationManager = UznNotificationManager(applicationContext)
         val mediaSessionTransferManager = MediaSessionTransferManager(this)
         val fileManager = FileManager()
         val fileTransferManager = FileTransferManager()
@@ -52,7 +54,8 @@ class UzayanForegroundService : Service() {
                     mediaSessionTransferManager,
                     imageTransferManager,
                     fileManager,
-                    fileTransferManager
+                    fileTransferManager,
+                    notificationManager
                 )
             ).initializeSocketServer()
         }

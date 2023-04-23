@@ -5,18 +5,20 @@ import dev.musakavak.uzayan.managers.FileManager
 import dev.musakavak.uzayan.managers.FileTransferManager
 import dev.musakavak.uzayan.managers.ImageTransferManager
 import dev.musakavak.uzayan.managers.MediaSessionTransferManager
+import dev.musakavak.uzayan.managers.NotificationManager
 import dev.musakavak.uzayan.managers.NotificationTransferManager
 import dev.musakavak.uzayan.services.NLService
 import org.json.JSONObject
 import java.io.InputStream
 import java.io.OutputStream
 
-class imageManagerActions(
+class Actions(
     private val shp: SharedPreferences,
     private val mediaSessionTransferManager: MediaSessionTransferManager,
     private val imageTransferManager: ImageTransferManager,
     private val fileManager: FileManager,
-    private val fileTransferManager: FileTransferManager
+    private val fileTransferManager: FileTransferManager,
+    private val notificationManager: NotificationManager
 ) {
 
     fun mediaSessionControl(json: JSONObject) {
@@ -85,7 +87,8 @@ class imageManagerActions(
             json.getString("path"),
             json.getLong("size"),
             input,
-            output
+            output,
+            notificationManager
         )
     }
 
