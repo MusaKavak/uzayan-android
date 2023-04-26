@@ -8,8 +8,10 @@ data class Notification(
     val bigText: String?,
     val infoText: String?,
     val largeIcon: String?,
+    val smallIcon: String?,
     val actions: List<String>?,
     val isGroup: Boolean,
+    val groupKey: String,
     val progressMax: Int?,
-    val process: Int?,
+    val progress: Int?,
 )
