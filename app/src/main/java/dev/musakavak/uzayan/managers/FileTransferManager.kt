@@ -12,8 +12,9 @@ import java.io.OutputStream
 class FileTransferManager {
     private val chunkSize = 4096
 
-    fun sendFile(file: File) {
-        try {
+    suspend fun sendFile(path: String, input: InputStream, output: OutputStream) =
+        withContext(Dispatchers.IO) {
+            try {
 //            scope.launch {
 //                withContext(Dispatchers.IO) {
 //                    _stream?.let { stream ->
@@ -29,10 +30,10 @@ class FileTransferManager {
 //                    }
 //                }
 //            }
-        } catch (e: Exception) {
-            println(e.message)
+            } catch (e: Exception) {
+                println(e.message)
+            }
         }
-    }
 
     suspend fun createFile(
         path: String,

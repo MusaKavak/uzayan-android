@@ -57,9 +57,11 @@ class Actions(
         )
     }
 
-    fun fileRequest(json: JSONObject) {
-        fileManager.sendFile(
-            json.getJSONObject("input").getString("path"),
+    suspend fun fileRequest(json: JSONObject, input: InputStream, output: OutputStream) {
+        fileTransferManager.sendFile(
+            json.getString("path"),
+            input,
+            output,
         )
     }
 
@@ -82,7 +84,7 @@ class Actions(
         )
     }
 
-    suspend fun createFile(json: JSONObject, input: InputStream, output: OutputStream) {
+    suspend fun createFileRequest(json: JSONObject, input: InputStream, output: OutputStream) {
         fileTransferManager.createFile(
             json.getString("path"),
             json.getLong("size"),

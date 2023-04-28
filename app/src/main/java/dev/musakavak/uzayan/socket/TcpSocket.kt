@@ -11,6 +11,7 @@ import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.InputStream
 import java.io.InputStreamReader
+import java.io.OutputStream
 import java.io.PrintWriter
 import java.net.InetSocketAddress
 import java.net.ServerSocket
@@ -19,9 +20,12 @@ import java.net.Socket
 class TcpSocket(
     private val actions: Actions
 ) {
-    private val MAIN_STREAM = 200
-    private val FILE_OUTPUT_STREAM = 201
-    private val FILE_INPUT_STREAM = 202
+    private enum class StreamType(val code: Int) {
+        MAIN(200),
+        FILE_OUTPUT(201),
+        FILE_INPUT(202)
+    }
+
     private var socketServer: ServerSocket? = null
     private val tag = "TcpSocketServer"
 
@@ -29,7 +33,6 @@ class TcpSocket(
         private val gson = Gson()
         var socketPort: Int? = null
 
-        var fileStream: Socket? = null
         private var mainStreamWriter: PrintWriter? = null
 
         private val scope = CoroutineScope(Dispatchers.IO)
@@ -73,73 +76,57 @@ class TcpSocket(
         }
     }
 
-    private suspend fun handleConnection(socket: Socket) {
+    private suspend fun handleConnection(socket: Socket) = withContext(Dispatchers.IO) {
         try {
             val inputStream = socket.getInputStream()
-            val streamType = inputStream.read()
-            if (streamType == MAIN_STREAM) {
-                mainStreamWriter = PrintWriter(socket.getOutputStream())
-                listenForMessages(inputStream, ::mainStreamActions)
-            }
-            if (streamType == FILE_OUTPUT_STREAM) {
-                fileStream = socket
-                listenForMessages(inputStream, ::fileOutputActions)
-            }
-            if (streamType == FILE_INPUT_STREAM) {
-                listenForFiles(socket)
+            when (inputStream.read()) {
+                StreamType.MAIN.code -> {
+                    mainStreamWriter = PrintWriter(socket.getOutputStream())
+                    listenMainStream(socket)
+                }
+
+                StreamType.FILE_INPUT.code -> listenFileStream(socket, actions::createFileRequest)
+                StreamType.FILE_OUTPUT.code -> listenFileStream(socket, actions::fileRequest)
+                else -> socket.close()
             }
         } catch (e: Exception) {
             println(e.message)
-
         }
     }
 
-    private fun listenForMessages(inputStream: InputStream, actions: (json: JSONObject) -> Unit) {
+    private fun listenMainStream(socket: Socket) {
         try {
-            BufferedReader(InputStreamReader(inputStream)).use { buffer ->
-                buffer.lineSequence().forEach { sequence ->
-                    val json = JSONObject(sequence)
-                    println("New Message:  " + json.get("message"))
-                    actions(json)
+            BufferedReader(InputStreamReader(socket.getInputStream())).use { buffer ->
+                buffer.lineSequence().forEach {
+                    val json = JSONObject(it)
+                    when (json.get("message")) {
+                        "TestConnection" -> emit("TestConnection", null)
+                        "Pair" -> actions.pair(json)
+                        "MediaSessionControl" -> actions.mediaSessionControl(json)
+                        "MediaSessionsRequest" -> actions.mediaSessionRequest()
+                        "NotificationAction" -> actions.notificationAction(json)
+                        "NotificationsRequest" -> actions.notificationsRequest()
+                        "ImageThumbnailRequest" -> actions.imageThumbnailRequest(json)
+                        "FileSystemRequest" -> actions.fileSystemRequest(json)
+                        "DeleteFileRequest" -> actions.deleteFileRequest(json)
+                        "MoveFileRequest" -> actions.moveFileRequest(json)
+                        else -> println("Message Not Found")
+                    }
                 }
             }
         } catch (e: Exception) {
             println(e.message)
         }
-
     }
 
-    private fun mainStreamActions(json: JSONObject) {
-        when (json.get("message")) {
-            "TestConnection" -> emit("TestConnection", null)
-            "Pair" -> actions.pair(json)
-            "MediaSessionControl" -> actions.mediaSessionControl(json)
-            "MediaSessionsRequest" -> actions.mediaSessionRequest()
-            "NotificationAction" -> actions.notificationAction(json)
-            "NotificationsRequest" -> actions.notificationsRequest()
-            "ImageThumbnailRequest" -> actions.imageThumbnailRequest(json)
-            "FileSystemRequest" -> actions.fileSystemRequest(json)
-            "DeleteFileRequest" -> actions.deleteFileRequest(json)
-            "MoveFileRequest" -> actions.moveFileRequest(json)
-            else -> {
-                println("Message Not Found")
-            }
-        }
-    }
-
-    private fun fileOutputActions(json: JSONObject) {
-        when (json.get("message")) {
-            "CloseLargeFileStream" -> {
-                fileStream?.close()
-                fileStream = null
-            }
-
-            "FileRequest" -> actions.fileRequest(json)
-            "FullSizeImageRequest" -> actions.fullSizeImageRequest(json)
-        }
-    }
-
-    private suspend fun listenForFiles(socket: Socket) = withContext(Dispatchers.IO) {
+    private suspend fun listenFileStream(
+        socket: Socket,
+        action: suspend (
+            j: JSONObject,
+            i: InputStream,
+            o: OutputStream
+        ) -> Unit
+    ) = withContext(Dispatchers.IO) {
         try {
             val input = socket.getInputStream()
             val output = socket.getOutputStream()
@@ -147,7 +134,7 @@ class TcpSocket(
                 val message =
                     BufferedReader(InputStreamReader(input)).readLine()
                 if (message == "done") break
-                actions.createFile(JSONObject(message), input, output)
+                action(JSONObject(message), input, output)
             }
         } catch (e: Exception) {
             println(e.message)
