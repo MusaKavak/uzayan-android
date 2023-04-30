@@ -15,21 +15,36 @@ class FileTransferManager {
     suspend fun sendFile(path: String, input: InputStream, output: OutputStream) =
         withContext(Dispatchers.IO) {
             try {
-//            scope.launch {
-//                withContext(Dispatchers.IO) {
-//                    _stream?.let { stream ->
-//                        TcpSocket.fileStream?.let { socket ->
-//                            val buffer = ByteArray(chunkSize)
-//                            val outputStream = socket.getOutputStream()
-//                            while (true) {
-//                                val bytesRead = stream.read(buffer)
-//                                if (bytesRead == -1) break
-//                                outputStream.write(buffer, 0, bytesRead)
-//                            }
-//                        }
-//                    }
-//                }
-//            }
+                val fileToSend = File(path)
+                val status = if (fileToSend.exists() && fileToSend.canRead()) 100 else 101
+                output.write(status)
+
+                if (status == 100) {
+                    val fis = fileToSend.inputStream()
+                    val size = fileToSend.length()
+                    var bytesSent = 0L
+
+                    val buf = ByteArray(chunkSize)
+
+                    val progressTracker = launch(Dispatchers.IO) {
+                        while (true) {
+                            println((bytesSent.toFloat() / size * 100).toInt())
+                            if (bytesSent >= size) break
+                            delay(1000L)
+                        }
+                    }
+
+                    while (true) {
+                        val bytesRead = fis.read(buf)
+                        output.write(buf, 0, bytesRead)
+                        bytesSent += bytesRead
+                        if (bytesSent >= size) break
+                    }
+
+                    fis.close()
+                    progressTracker.cancelAndJoin()
+                }
+
             } catch (e: Exception) {
                 println(e.message)
             }
