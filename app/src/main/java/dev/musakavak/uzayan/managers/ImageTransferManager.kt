@@ -19,7 +19,7 @@ class ImageTransferManager(private val context: Context) {
     )
     private val imageTool = Base64Tool()
     private val contentResolver = context.contentResolver
-
+    private val supportedFormats = setOf("jpg", "jpeg", "png", "gif", "bmp", "webp")
     fun sendSlice(start: Int?, length: Int?) {
         if (start == null || length == null) return
         invokeCursor {
@@ -42,17 +42,25 @@ class ImageTransferManager(private val context: Context) {
     }
 
     private fun sendThumbnail(cursor: Cursor) {
-        TcpSocket.emit("ImageThumbnail", getThumbnail(cursor))
+        val thumbnail = getThumbnail(cursor)
+        thumbnail?.let {
+            TcpSocket.emit("ImageThumbnail", it)
+        }
     }
 
-    private fun getThumbnail(cursor: Cursor): ImageThumbnail {
-        val id = cursor.getLong(
-            cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
-        )
+    private fun getThumbnail(cursor: Cursor): ImageThumbnail? {
         val name =
             cursor.getString(
                 cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME)
             )
+
+        val imageFormat = name.substringAfterLast('.', "").lowercase()
+        if (!supportedFormats.contains(imageFormat)) return null
+
+        val id = cursor.getLong(
+            cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
+        )
+
         val date =
             cursor.getLong(
                 cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_ADDED)
