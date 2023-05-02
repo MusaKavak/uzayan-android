@@ -58,9 +58,17 @@ class Actions(
     }
 
     suspend fun fileRequest(json: JSONObject, input: InputStream, output: OutputStream) {
-        fileTransferManager.sendFile(
-            json.getString("path"),
-            input,
+        val id = json.getString("id")
+        val size = json.getString("size").toLongOrNull()
+        val fileInput: InputStream? = when (json.getString("transferType")) {
+            "FileTransfer" -> fileManager.getFileToSend(id)
+            "ImageTransfer" -> imageTransferManager.getImageInputStream(id)
+            else -> null
+        }
+
+        fileTransferManager.sendFromInputStream(
+            fileInput,
+            size,
             output,
         )
     }
@@ -75,12 +83,6 @@ class Actions(
         fileManager.moveFile(
             json.getJSONObject("input").getString("source"),
             json.getJSONObject("input").getString("target"),
-        )
-    }
-
-    fun fullSizeImageRequest(json: JSONObject) {
-        imageTransferManager.sendFullSizeImage(
-            json.getJSONObject("input").getString("id"),
         )
     }
 

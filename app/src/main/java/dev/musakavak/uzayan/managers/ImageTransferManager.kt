@@ -9,6 +9,7 @@ import android.util.Size
 import dev.musakavak.uzayan.models.ImageThumbnail
 import dev.musakavak.uzayan.socket.TcpSocket
 import dev.musakavak.uzayan.tools.Base64Tool
+import java.io.InputStream
 
 class ImageTransferManager(private val context: Context) {
     private val projection = arrayOf(
@@ -32,13 +33,13 @@ class ImageTransferManager(private val context: Context) {
         }
     }
 
-    fun sendFullSizeImage(id: String?) {
-        if (id.isNullOrBlank()) return
+    fun getImageInputStream(id: String?): InputStream? {
+        if (id.isNullOrBlank()) return null
         id.toLongOrNull()?.let {
             val uri = getUri(it)
-            val inputStream = context.contentResolver.openInputStream(uri)
-            // largeFileTool.sendWithInputStream(inputStream)
+            return context.contentResolver.openInputStream(uri)
         }
+        return null
     }
 
     private fun sendThumbnail(cursor: Cursor) {
@@ -74,6 +75,7 @@ class ImageTransferManager(private val context: Context) {
             getUri(id),
             Size(120, 120), null
         )
+
         return ImageThumbnail(
             id.toString(),
             imageTool.fromBitmap(thumbnail),

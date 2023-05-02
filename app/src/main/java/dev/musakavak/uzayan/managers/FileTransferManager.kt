@@ -12,39 +12,35 @@ import java.io.OutputStream
 class FileTransferManager {
     private val chunkSize = 4096
 
-    suspend fun sendFile(path: String, input: InputStream, output: OutputStream) =
+    suspend fun sendFromInputStream(fileIn: InputStream?, size: Long?, socketOut: OutputStream) =
         withContext(Dispatchers.IO) {
             try {
-                val fileToSend = File(path)
-                val status = if (fileToSend.exists() && fileToSend.canRead()) 100 else 101
-                output.write(status)
+                if (fileIn == null || size == null) {
+                    socketOut.write(101)
+                    return@withContext
+                }
+                socketOut.write(100)
+                var bytesSent = 0L
 
-                if (status == 100) {
-                    val fis = fileToSend.inputStream()
-                    val size = fileToSend.length()
-                    var bytesSent = 0L
+                val buf = ByteArray(chunkSize)
 
-                    val buf = ByteArray(chunkSize)
-
-                    val progressTracker = launch(Dispatchers.IO) {
-                        while (true) {
-                            println((bytesSent.toFloat() / size * 100).toInt())
-                            if (bytesSent >= size) break
-                            delay(1000L)
-                        }
-                    }
-
+                val progressTracker = launch(Dispatchers.IO) {
                     while (true) {
-                        val bytesRead = fis.read(buf)
-                        output.write(buf, 0, bytesRead)
-                        bytesSent += bytesRead
+                        println((bytesSent.toFloat() / size * 100).toInt())
                         if (bytesSent >= size) break
+                        delay(1000L)
                     }
-
-                    fis.close()
-                    progressTracker.cancelAndJoin()
                 }
 
+                while (true) {
+                    val bytesRead = fileIn.read(buf)
+                    socketOut.write(buf, 0, bytesRead)
+                    bytesSent += bytesRead
+                    if (bytesSent >= size) break
+                }
+
+                fileIn.close()
+                progressTracker.cancelAndJoin()
             } catch (e: Exception) {
                 println(e.message)
             }

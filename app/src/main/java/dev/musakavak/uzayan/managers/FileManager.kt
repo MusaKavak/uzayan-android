@@ -3,6 +3,7 @@ package dev.musakavak.uzayan.managers
 import android.os.Environment
 import dev.musakavak.uzayan.socket.TcpSocket
 import java.io.File
+import java.io.InputStream
 import kotlin.io.path.moveTo
 import dev.musakavak.uzayan.models.File as ModelFile
 
@@ -22,14 +23,15 @@ class FileManager {
         TcpSocket.emit("FileSystem", fileSystemToSend)
     }
 
-    fun sendFile(path: String) {
+    fun getFileToSend(path: String): InputStream? {
         val fileToSend = File(path)
         if (fileToSend.exists() &&
             fileToSend.isFile &&
             fileToSend.canRead()
         ) {
-            //largeFileTool.sendWithInputStream(fileToSend.inputStream())
+            return fileToSend.inputStream()
         }
+        return null
     }
 
     fun deleteFile(path: String) {
