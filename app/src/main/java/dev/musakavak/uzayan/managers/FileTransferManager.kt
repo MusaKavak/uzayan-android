@@ -12,7 +12,12 @@ import java.io.OutputStream
 class FileTransferManager {
     private val chunkSize = 4096
 
-    suspend fun sendFromInputStream(fileIn: InputStream?, size: Long?, socketOut: OutputStream) =
+    suspend fun sendFromInputStream(
+        fileIn: InputStream?,
+        size: Long?,
+        socketIn: InputStream,
+        socketOut: OutputStream
+    ) =
         withContext(Dispatchers.IO) {
             try {
                 if (fileIn == null || size == null) {
@@ -40,6 +45,7 @@ class FileTransferManager {
                 }
 
                 fileIn.close()
+                socketIn.read()
                 progressTracker.cancelAndJoin()
             } catch (e: Exception) {
                 println(e.message)

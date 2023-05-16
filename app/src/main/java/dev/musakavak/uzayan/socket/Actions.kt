@@ -69,6 +69,7 @@ class Actions(
         fileTransferManager.sendFromInputStream(
             fileInput,
             size,
+            input,
             output,
         )
     }
