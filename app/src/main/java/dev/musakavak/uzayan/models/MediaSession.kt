@@ -5,10 +5,10 @@ data class MediaSession(
     val artist: String?,
     val albumName: String?,
     val duration: Long?,
-    val isPlaying: Boolean?,
+    val isPlaying: Boolean,
     val packageName: String?,
     val position: Long?,
     val ratingType: String?,
     val title: String?,
-    val token: String?
+    val token: String
 )
