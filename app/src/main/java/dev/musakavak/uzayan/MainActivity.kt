@@ -34,23 +34,11 @@ class MainActivity : ComponentActivity() {
         startForeground()
         setContent {
             UzayanTheme {
-                // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        val urlArgs = intent.data
-                        urlArgs?.let {
-                            val ip = it.getQueryParameter("ip")
-                            val port = it.getQueryParameter("port")?.toIntOrNull()
-                            val code = it.getQueryParameter("code")
-                            if (ip != null && port != null && code != null) {
-                                PairTool().sendPairRequest(ip, port, code)
-                                Text(text = "Pair Request Sent")
-                            } else {
-                                Text(text = "Some Error Occurred")
-                            }
-                        }
+                        ConnectionCard()
                         Home()
                     }
                 }
@@ -69,6 +57,22 @@ class MainActivity : ComponentActivity() {
     private fun startForeground() {
         val intent = Intent(this, UzayanForegroundService::class.java)
         startForegroundService(intent)
+    }
+
+    @Composable
+    private fun ConnectionCard() {
+        val urlArgs = intent.data
+        urlArgs?.let {
+            val ip = it.getQueryParameter("ip")
+            val port = it.getQueryParameter("port")?.toIntOrNull()
+            val code = it.getQueryParameter("code")
+            if (ip != null && port != null && code != null) {
+                PairTool().sendPairRequest(ip, port, code)
+                Text(text = "Pair Request Sent")
+            } else {
+                Text(text = "Some Error Occurred")
+            }
+        }
     }
 }
 
