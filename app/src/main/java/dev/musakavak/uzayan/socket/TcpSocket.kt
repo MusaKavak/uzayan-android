@@ -1,8 +1,11 @@
 package dev.musakavak.uzayan.socket
 
 import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import com.google.gson.Gson
-import dev.musakavak.uzayan.models.ConnectionObject
+import dev.musakavak.uzayan.models.NetworkMessage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -32,6 +35,7 @@ class TcpSocket(
     companion object {
         private val gson = Gson()
         var socketPort: Int? = null
+        var connectedClientPort by mutableStateOf<Int?>(null)
 
         private var mainStreamWriter: PrintWriter? = null
 
@@ -40,7 +44,7 @@ class TcpSocket(
             scope.launch {
                 withContext(Dispatchers.IO) {
                     mainStreamWriter?.let {
-                        val message = gson.toJson(ConnectionObject(event, input))
+                        val message = gson.toJson(NetworkMessage(event, input))
                         it.println(message)
                         it.flush()
                     }
@@ -82,6 +86,7 @@ class TcpSocket(
             when (inputStream.read()) {
                 StreamType.MAIN.code -> {
                     mainStreamWriter = PrintWriter(socket.getOutputStream())
+                    connectedClientPort = socket.port
                     listenMainStream(socket)
                 }
 
@@ -114,6 +119,7 @@ class TcpSocket(
                     }
                 }
             }
+            connectedClientPort = null
         } catch (e: Exception) {
             println(e.message)
         }

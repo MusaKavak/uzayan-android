@@ -2,6 +2,7 @@ package dev.musakavak.uzayan
 
 import android.content.Intent
 import android.os.Bundle
+import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
@@ -15,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
+import dev.musakavak.uzayan.components.ConnectionStateCard
 import dev.musakavak.uzayan.services.UzayanForegroundService
 import dev.musakavak.uzayan.tools.PairTool
 import dev.musakavak.uzayan.ui.theme.UzayanTheme
@@ -30,7 +32,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         startForeground()
         setContent {
             UzayanTheme {
@@ -38,6 +39,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        ConnectionStateCard()
                         ConnectionCard()
                         Home()
                     }
@@ -66,13 +68,18 @@ class MainActivity : ComponentActivity() {
             val ip = it.getQueryParameter("ip")
             val port = it.getQueryParameter("port")?.toIntOrNull()
             val code = it.getQueryParameter("code")
+            val name = it.getQueryParameter("name")
             if (ip != null && port != null && code != null) {
-                PairTool().sendPairRequest(ip, port, code)
-                Text(text = "Pair Request Sent")
+                PairTool().sendPairRequest(ip, port, code, getDeviceName())
+                Text(text = "Pair Request Sent To $name")
             } else {
                 Text(text = "Some Error Occurred")
             }
         }
+    }
+
+    private fun getDeviceName(): String {
+        return Settings.Global.getString(contentResolver, Settings.Global.DEVICE_NAME)
     }
 }
 

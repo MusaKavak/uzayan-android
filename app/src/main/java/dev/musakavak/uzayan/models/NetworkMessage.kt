@@ -1,6 +1,6 @@
 package dev.musakavak.uzayan.models
 
-data class ConnectionObject<T>(
+data class NetworkMessage<T>(
     val event: String,
-    val input: T
+    val payload: T
 )
