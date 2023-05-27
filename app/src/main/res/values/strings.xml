@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Uzayan</string>
+    <string name="app_icon_description">App Icon</string>
+    <string name="no_connection">No Connection</string>
 </resources>

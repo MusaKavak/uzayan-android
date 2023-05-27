@@ -5,7 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.service.notification.StatusBarNotification
 import dev.musakavak.uzayan.models.Notification
-import dev.musakavak.uzayan.socket.TcpSocket
+import dev.musakavak.uzayan.socket.Emitter
 import dev.musakavak.uzayan.tools.Base64Tool
 import android.app.Notification as AndroidNotification
 
@@ -37,7 +37,7 @@ class NotificationTransferManager(private val context: Context) {
 
     fun sendNotification(sbn: StatusBarNotification) {
         if (sbn.notification.extras.containsKey("android.mediaSession")) return
-        TcpSocket.emit("Notification", createNotification(sbn))
+        Emitter.emit("Notification", createNotification(sbn))
     }
 
     fun sendNotificationList(list: Array<StatusBarNotification>) {
@@ -46,11 +46,11 @@ class NotificationTransferManager(private val context: Context) {
             if (!it.notification.extras.containsKey("android.mediaSession"))
                 notifications.add(createNotification(it))
         }
-        TcpSocket.emit("Notifications", notifications)
+        Emitter.emit("Notifications", notifications)
     }
 
     fun sendRemoveNotification(key: String) {
-        TcpSocket.emit("RemoveNotification", key)
+        Emitter.emit("RemoveNotification", key)
     }
 
     @Suppress("DEPRECATION")

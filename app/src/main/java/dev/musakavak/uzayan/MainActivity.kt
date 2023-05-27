@@ -5,8 +5,10 @@ import android.os.Bundle
 import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -16,9 +18,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import dev.musakavak.uzayan.components.ConnectionStateCard
 import dev.musakavak.uzayan.services.UzayanForegroundService
-import dev.musakavak.uzayan.tools.PairTool
 import dev.musakavak.uzayan.ui.theme.UzayanTheme
 
 class MainActivity : ComponentActivity() {
@@ -36,11 +38,13 @@ class MainActivity : ComponentActivity() {
         setContent {
             UzayanTheme {
                 Surface(
-                    modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.background)
+                        .padding(15.dp),
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        ConnectionStateCard()
-                        ConnectionCard()
+                        ConnectionStateCard(intent.data, getDeviceName())
                         Home()
                     }
                 }
@@ -59,23 +63,6 @@ class MainActivity : ComponentActivity() {
     private fun startForeground() {
         val intent = Intent(this, UzayanForegroundService::class.java)
         startForegroundService(intent)
-    }
-
-    @Composable
-    private fun ConnectionCard() {
-        val urlArgs = intent.data
-        urlArgs?.let {
-            val ip = it.getQueryParameter("ip")
-            val port = it.getQueryParameter("port")?.toIntOrNull()
-            val code = it.getQueryParameter("code")
-            val name = it.getQueryParameter("name")
-            if (ip != null && port != null && code != null) {
-                PairTool().sendPairRequest(ip, port, code, getDeviceName())
-                Text(text = "Pair Request Sent To $name")
-            } else {
-                Text(text = "Some Error Occurred")
-            }
-        }
     }
 
     private fun getDeviceName(): String {

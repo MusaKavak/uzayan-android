@@ -10,7 +10,7 @@
       android:translateY="102.4">
     <path
         android:pathData="m167.78,80.59c-11.34,124.85 22.75,178.52 86.84,180.31 63.81,1.78 89.32,-54.43 91.32,-180.31"
-        android:strokeWidth="20"
+        android:strokeWidth="30"
         android:fillColor="#00000000"
         android:strokeLineCap="round">
       <aapt:attr name="android:strokeColor">
@@ -27,7 +27,7 @@
     </path>
     <path
         android:pathData="m167.78,431.41c-11.34,-124.85 22.75,-178.52 86.84,-180.31 63.81,-1.78 89.32,54.43 91.32,180.31"
-        android:strokeWidth="20"
+        android:strokeWidth="30"
         android:fillColor="#00000000"
         android:strokeColor="#2fd37d"
         android:strokeLineCap="round"/>

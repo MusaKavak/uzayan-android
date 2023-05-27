@@ -7,7 +7,7 @@ import android.net.Uri
 import android.provider.MediaStore
 import android.util.Size
 import dev.musakavak.uzayan.models.ImageThumbnail
-import dev.musakavak.uzayan.socket.TcpSocket
+import dev.musakavak.uzayan.socket.Emitter
 import dev.musakavak.uzayan.tools.Base64Tool
 import java.io.InputStream
 
@@ -45,7 +45,7 @@ class ImageTransferManager(private val context: Context) {
     private fun sendThumbnail(cursor: Cursor) {
         val thumbnail = getThumbnail(cursor)
         thumbnail?.let {
-            TcpSocket.emit("ImageThumbnail", it)
+            Emitter.emit("ImageThumbnail", it)
         }
     }
 

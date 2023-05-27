@@ -3,7 +3,7 @@ package dev.musakavak.uzayan.tools
 import com.google.gson.Gson
 import dev.musakavak.uzayan.models.NetworkMessage
 import dev.musakavak.uzayan.models.PairObject
-import dev.musakavak.uzayan.socket.TcpSocket
+import dev.musakavak.uzayan.socket.SocketServer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -18,7 +18,7 @@ class PairTool {
         CoroutineScope(Dispatchers.IO).launch {
             withContext(Dispatchers.IO) {
                 val udp = DatagramSocket()
-                TcpSocket.socketPort?.let {
+                SocketServer.port?.let {
                     val pairInput = PairObject(it, pairCode, name)
 
                     val pairObject = NetworkMessage("Pair", pairInput)

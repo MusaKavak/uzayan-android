@@ -1,11 +1,6 @@
 package dev.musakavak.uzayan.socket
 
 import android.util.Log
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import com.google.gson.Gson
-import dev.musakavak.uzayan.models.NetworkMessage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -20,62 +15,36 @@ import java.net.InetSocketAddress
 import java.net.ServerSocket
 import java.net.Socket
 
-class TcpSocket(
-    private val actions: Actions
-) {
+class SocketServer(private val actions: Actions) {
     private enum class StreamType(val code: Int) {
         MAIN(200),
         FILE_OUTPUT(201),
         FILE_INPUT(202)
     }
 
-    private var socketServer: ServerSocket? = null
     private val tag = "TcpSocketServer"
 
     companion object {
-        private val gson = Gson()
-        var socketPort: Int? = null
-        var connectedClientPort by mutableStateOf<Int?>(null)
+        var port: Int? = null
+    }
 
-        private var mainStreamWriter: PrintWriter? = null
-
-        private val scope = CoroutineScope(Dispatchers.IO)
-        fun <T> emit(event: String, input: T) {
-            scope.launch {
-                withContext(Dispatchers.IO) {
-                    mainStreamWriter?.let {
-                        val message = gson.toJson(NetworkMessage(event, input))
-                        it.println(message)
-                        it.flush()
-                    }
-                }
-            }
+    suspend fun initialize() = withContext(Dispatchers.IO) {
+        if (port == null) {
+            val newServer = ServerSocket()
+            newServer.bind(InetSocketAddress(0))
+            port = newServer.localPort
+            listenForConnection(newServer)
         }
     }
 
-    suspend fun initializeSocketServer() {
-        withContext(Dispatchers.IO) {
-            if (socketServer == null) {
-                val newServer = ServerSocket()
-                newServer.bind(InetSocketAddress(0))
-                socketPort = newServer.localPort
-                socketServer = newServer
-                listenForConnection()
-            }
-        }
-    }
-
-    private val scope = CoroutineScope(Dispatchers.IO)
-    private fun listenForConnection() {
-        socketServer?.let {
-            while (!it.isClosed) {
-                val socket = it.accept()
-                scope.launch {
-                    val address = "${socket?.inetAddress?.hostName}:${socket.port}"
-                    Log.w(tag, "New Tcp Socket Connection From: $address")
-                    handleConnection(socket)
-                    Log.w(tag, "Tcp Socket From: $address Is Disconnected")
-                }
+    private fun listenForConnection(server: ServerSocket) {
+        while (!server.isClosed) {
+            val socket = server.accept()
+            CoroutineScope(Dispatchers.IO).launch {
+                val address = "${socket?.inetAddress?.hostName}:${socket.port}"
+                Log.w(tag, "New Tcp Socket Connection From: $address")
+                handleConnection(socket)
+                Log.w(tag, "Tcp Socket From: $address Is Disconnected")
             }
         }
     }
@@ -85,8 +54,7 @@ class TcpSocket(
             val inputStream = socket.getInputStream()
             when (inputStream.read()) {
                 StreamType.MAIN.code -> {
-                    mainStreamWriter = PrintWriter(socket.getOutputStream())
-                    connectedClientPort = socket.port
+                    Emitter.writer = PrintWriter(socket.getOutputStream())
                     listenMainStream(socket)
                 }
 
@@ -105,7 +73,6 @@ class TcpSocket(
                 buffer.lineSequence().forEach {
                     val json = JSONObject(it)
                     when (json.get("message")) {
-                        "TestConnection" -> emit("TestConnection", null)
                         "Pair" -> actions.pair(json)
                         "MediaSessionControl" -> actions.mediaSessionControl(json)
                         "MediaSessionsRequest" -> actions.mediaSessionRequest()
@@ -119,7 +86,7 @@ class TcpSocket(
                     }
                 }
             }
-            connectedClientPort = null
+            Emitter.connectedClientName = null
         } catch (e: Exception) {
             println(e.message)
         }

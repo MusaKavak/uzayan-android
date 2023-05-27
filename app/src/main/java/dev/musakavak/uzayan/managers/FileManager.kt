@@ -1,7 +1,7 @@
 package dev.musakavak.uzayan.managers
 
 import android.os.Environment
-import dev.musakavak.uzayan.socket.TcpSocket
+import dev.musakavak.uzayan.socket.Emitter
 import java.io.File
 import java.io.InputStream
 import kotlin.io.path.moveTo
@@ -20,7 +20,7 @@ class FileManager {
                     externalStoragePath = it.path
                 }
         }
-        TcpSocket.emit("FileSystem", fileSystemToSend)
+        Emitter.emit("FileSystem", fileSystemToSend)
     }
 
     fun getFileToSend(path: String): InputStream? {

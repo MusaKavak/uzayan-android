@@ -12,7 +12,7 @@ import dev.musakavak.uzayan.managers.FileTransferManager
 import dev.musakavak.uzayan.managers.ImageTransferManager
 import dev.musakavak.uzayan.managers.MediaSessionTransferManager
 import dev.musakavak.uzayan.socket.Actions
-import dev.musakavak.uzayan.socket.TcpSocket
+import dev.musakavak.uzayan.socket.SocketServer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -48,7 +48,7 @@ class UzayanForegroundService : Service() {
         mediaSessionTransferManager.listen()
         val imageTransferManager = ImageTransferManager(this)
         CoroutineScope(Dispatchers.IO).launch {
-            TcpSocket(
+            SocketServer(
                 Actions(
                     shp,
                     mediaSessionTransferManager,
@@ -57,7 +57,7 @@ class UzayanForegroundService : Service() {
                     fileTransferManager,
                     notificationManager
                 )
-            ).initializeSocketServer()
+            ).initialize()
         }
     }
 }
