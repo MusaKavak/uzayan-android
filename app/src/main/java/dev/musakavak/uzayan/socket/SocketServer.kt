@@ -73,7 +73,6 @@ class SocketServer(private val actions: Actions) {
                 buffer.lineSequence().forEach {
                     val json = JSONObject(it)
                     when (json.get("message")) {
-                        "Pair" -> actions.pair(json)
                         "MediaSessionControl" -> actions.mediaSessionControl(json)
                         "MediaSessionsRequest" -> actions.mediaSessionRequest()
                         "NotificationAction" -> actions.notificationAction(json)

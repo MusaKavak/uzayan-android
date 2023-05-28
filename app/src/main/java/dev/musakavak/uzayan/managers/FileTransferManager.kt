@@ -57,7 +57,7 @@ class FileTransferManager {
         size: Long,
         input: InputStream,
         output: OutputStream,
-        notificationManager: NotificationManager
+        notificationManager: NotificationManager?
     ) = withContext(Dispatchers.IO) {
         try {
             val fileToCreate = File(path)
@@ -73,17 +73,20 @@ class FileTransferManager {
             val fileOutput = fileToCreate.outputStream()
             val buffer = ByteArray(chunkSize)
             var bytesReceived: Long = 0
-            val nf = notificationManager.createFileTransferNotification(
+            val nf = notificationManager?.createFileTransferNotification(
                 "Receiving ${fileToCreate.name}",
                 "${fileToCreate.name} Received"
             )
+
             output.write(100)
 
             val progressTracker = launch(Dispatchers.IO) {
-                while (true) {
-                    nf((bytesReceived.toFloat() / size * 100).toInt())
-                    if (bytesReceived >= size) break
-                    delay(1000L)
+                nf?.let {
+                    while (true) {
+                        nf((bytesReceived.toFloat() / size * 100).toInt())
+                        if (bytesReceived >= size) break
+                        delay(1000L)
+                    }
                 }
             }
 
@@ -96,7 +99,7 @@ class FileTransferManager {
 
             fileOutput.close()
             progressTracker.cancelAndJoin()
-            nf(100)
+            nf?.let { it(100) }
             output.write(99)
         } catch (e: Exception) {
             println(e)

@@ -9,17 +9,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.musakavak.uzayan.components.ConnectionStateCard
+import dev.musakavak.uzayan.models.AllowList
 import dev.musakavak.uzayan.services.UzayanForegroundService
 import dev.musakavak.uzayan.ui.theme.UzayanTheme
 
@@ -45,24 +41,16 @@ class MainActivity : ComponentActivity() {
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         ConnectionStateCard(intent.data, getDeviceName())
-                        Home()
                     }
                 }
             }
         }
     }
 
-    @Composable
-    @Preview
-    fun Home() {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(text = "Uzayan", Modifier.size(Dp(50F)))
-        }
-    }
-
     private fun startForeground() {
         val intent = Intent(this, UzayanForegroundService::class.java)
         startForegroundService(intent)
+        UzayanForegroundService.setActions(AllowList(true, true, true, true, true))
     }
 
     private fun getDeviceName(): String {

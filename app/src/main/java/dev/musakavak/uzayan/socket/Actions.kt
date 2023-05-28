@@ -1,6 +1,5 @@
 package dev.musakavak.uzayan.socket
 
-import android.content.SharedPreferences
 import dev.musakavak.uzayan.managers.FileManager
 import dev.musakavak.uzayan.managers.FileTransferManager
 import dev.musakavak.uzayan.managers.ImageTransferManager
@@ -12,17 +11,16 @@ import org.json.JSONObject
 import java.io.InputStream
 import java.io.OutputStream
 
-class Actions(
-    private val shp: SharedPreferences,
-    private val mediaSessionTransferManager: MediaSessionTransferManager,
-    private val imageTransferManager: ImageTransferManager,
-    private val fileManager: FileManager,
-    private val fileTransferManager: FileTransferManager,
-    private val notificationManager: NotificationManager
-) {
+class Actions {
+    var mediaSessionTransferManager: MediaSessionTransferManager? = null
+    var imageTransferManager: ImageTransferManager? = null
+    var fileManager: FileManager? = null
+    var fileTransferManager: FileTransferManager? = null
+    var notificationManager: NotificationManager? = null
+    var allowNotificationTransfer: Boolean = false
 
     fun mediaSessionControl(json: JSONObject) {
-        mediaSessionTransferManager.mediaSessionControl(
+        mediaSessionTransferManager?.mediaSessionControl(
             json.getJSONObject("input").getString("token"),
             json.getJSONObject("input").getString("action"),
             json.getJSONObject("input").get("value"),
@@ -30,29 +28,29 @@ class Actions(
     }
 
     fun mediaSessionRequest() {
-        mediaSessionTransferManager.sendCurrentSessions()
+        mediaSessionTransferManager?.sendCurrentSessions()
     }
 
     fun notificationAction(json: JSONObject) {
-        NotificationTransferManager.sendAction(
+        if (allowNotificationTransfer) NotificationTransferManager.sendAction(
             json.getJSONObject("input").getString("key"),
             json.getJSONObject("input").getString("action")
         )
     }
 
     fun notificationsRequest() {
-        NLService.sendActiveNotifications()
+        if (allowNotificationTransfer) NLService.sendActiveNotifications()
     }
 
     fun imageThumbnailRequest(json: JSONObject) {
-        imageTransferManager.sendSlice(
+        imageTransferManager?.sendSlice(
             json.getJSONObject("input").getInt("start"),
             json.getJSONObject("input").getInt("length"),
         )
     }
 
     fun fileSystemRequest(json: JSONObject) {
-        fileManager.sendFileSystem(
+        fileManager?.sendFileSystem(
             json.getJSONObject("input").getString("path"),
         )
     }
@@ -61,12 +59,12 @@ class Actions(
         val id = json.getString("id")
         val size = json.getString("size").toLongOrNull()
         val fileInput: InputStream? = when (json.getString("transferType")) {
-            "FileTransfer" -> fileManager.getFileToSend(id)
-            "ImageTransfer" -> imageTransferManager.getImageInputStream(id)
+            "FileTransfer" -> fileManager?.getFileToSend(id)
+            "ImageTransfer" -> imageTransferManager?.getImageInputStream(id)
             else -> null
         }
 
-        fileTransferManager.sendFromInputStream(
+        fileTransferManager?.sendFromInputStream(
             fileInput,
             size,
             input,
@@ -75,36 +73,25 @@ class Actions(
     }
 
     fun deleteFileRequest(json: JSONObject) {
-        fileManager.deleteFile(
+        fileManager?.deleteFile(
             json.getJSONObject("input").getString("path"),
         )
     }
 
     fun moveFileRequest(json: JSONObject) {
-        fileManager.moveFile(
+        fileManager?.moveFile(
             json.getJSONObject("input").getString("source"),
             json.getJSONObject("input").getString("target"),
         )
     }
 
     suspend fun createFileRequest(json: JSONObject, input: InputStream, output: OutputStream) {
-        fileTransferManager.createFile(
+        fileTransferManager?.createFile(
             json.getString("path"),
             json.getLong("size"),
             input,
             output,
             notificationManager
         )
-    }
-
-    fun pair(json: JSONObject) {
-        val address = json.getJSONObject("input").getString("address")
-        val port = json.getJSONObject("input").getString("port")
-
-        shp.edit().apply {
-            putString("ClientAddress", address)
-            putString("ClientPort", port)
-            apply()
-        }
     }
 }
