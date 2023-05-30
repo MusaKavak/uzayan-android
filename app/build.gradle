@@ -66,6 +66,6 @@ dependencies {
     //Gson
     implementation 'com.google.code.gson:gson:2.10.1'
     implementation 'org.json:json:20220924'
-    // https://mvnrepository.com/artifact/androidx.lifecycle/lifecycle-viewmodel-ktx
-    runtimeOnly 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1'
+    // https://mvnrepository.com/artifact/androidx.lifecycle/lifecycle-viewmodel-compose
+    implementation "androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1"
 }

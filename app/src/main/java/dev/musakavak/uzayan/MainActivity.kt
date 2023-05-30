@@ -1,5 +1,6 @@
 package dev.musakavak.uzayan
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.provider.Settings
@@ -14,8 +15,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import dev.musakavak.uzayan.components.AllowListColumn
 import dev.musakavak.uzayan.components.ConnectionStateCard
-import dev.musakavak.uzayan.models.AllowList
+import dev.musakavak.uzayan.managers.AllowListManager
 import dev.musakavak.uzayan.services.UzayanForegroundService
 import dev.musakavak.uzayan.ui.theme.UzayanTheme
 
@@ -41,6 +43,8 @@ class MainActivity : ComponentActivity() {
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         ConnectionStateCard(intent.data, getDeviceName())
+                        val sp = getSharedPreferences("uzayan_allow_list", Context.MODE_PRIVATE)
+                        AllowListColumn(AllowListManager(sp))
                     }
                 }
             }
@@ -50,7 +54,6 @@ class MainActivity : ComponentActivity() {
     private fun startForeground() {
         val intent = Intent(this, UzayanForegroundService::class.java)
         startForegroundService(intent)
-        UzayanForegroundService.setActions(AllowList(true, true, true, true, true))
     }
 
     private fun getDeviceName(): String {
