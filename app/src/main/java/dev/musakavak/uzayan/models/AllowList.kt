@@ -1,9 +1,15 @@
 package dev.musakavak.uzayan.models
 
 data class AllowList(
-    var mediaSessions: Boolean = false,
+    var file: Boolean = false,
+    var renameFile: Boolean = false,
+    var deleteFile: Boolean = false,
+    var sendFile: Boolean = false,
+    var receiveFile: Boolean = false,
+
+    var mediaSession: Boolean = false,
+    var mediaSessionControl: Boolean = false,
+
     var notifications: Boolean = false,
-    var notificationTransfer: Boolean = false,
-    var fileTransfer: Boolean = false,
-    var imageTransfer: Boolean = false,
+    var notificationControls: Boolean = false,
 )
