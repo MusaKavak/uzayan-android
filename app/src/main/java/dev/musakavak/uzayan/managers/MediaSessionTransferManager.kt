@@ -1,7 +1,6 @@
 package dev.musakavak.uzayan.managers
 
 import android.content.ComponentName
-import android.content.Context
 import android.media.MediaMetadata
 import android.media.Rating
 import android.media.session.MediaController
@@ -9,14 +8,13 @@ import android.media.session.MediaSessionManager
 import android.media.session.PlaybackState
 import dev.musakavak.uzayan.models.MediaSession
 import dev.musakavak.uzayan.models.MediaSessionState
-import dev.musakavak.uzayan.services.NLService
 import dev.musakavak.uzayan.socket.Emitter
 import dev.musakavak.uzayan.tools.Base64Tool
 
-class MediaSessionTransferManager(context: Context) {
-    private val manager: MediaSessionManager =
-        context.getSystemService(Context.MEDIA_SESSION_SERVICE) as MediaSessionManager
-    private val componentName = ComponentName(context, NLService::class.java)
+class MediaSessionTransferManager(
+    private val manager: MediaSessionManager,
+    private val componentName: ComponentName
+) {
     private val imageTool = Base64Tool()
 
     private data class PreviousController(

@@ -4,8 +4,10 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.media.session.MediaSessionManager
 import android.os.IBinder
 import dev.musakavak.uzayan.managers.FileManager
 import dev.musakavak.uzayan.managers.FileTransferManager
@@ -47,26 +49,31 @@ class UzayanForegroundService : Service() {
     }
 
     override fun onCreate() {
+        setActions(AllowList())
         CoroutineScope(Dispatchers.IO).launch { SocketServer(actions).initialize() }
     }
 
     private fun setActions(allowList: AllowList) {
         actions.mediaSessionTransferManager =
-            if (allowList.mediaSessions) MediaSessionTransferManager(applicationContext).also { it.listen() }
+            if (allowList.mediaSession) getMSTManager()
             else null
-        actions.notificationManager =
-            if (allowList.notifications) UznNotificationManager(applicationContext)
-            else null
-        if (allowList.fileTransfer) {
+        if (allowList.file) {
             actions.fileManager = FileManager()
             actions.fileTransferManager = FileTransferManager()
-            if (allowList.imageTransfer) actions.imageTransferManager =
-                ImageTransferManager(applicationContext)
+            actions.imageTransferManager = ImageTransferManager(applicationContext.contentResolver)
         } else {
             actions.fileManager = null
             actions.fileTransferManager = null
             actions.imageTransferManager = null
         }
-        actions.allowNotificationTransfer = allowList.notificationTransfer
+        actions.notificationManager = UznNotificationManager(applicationContext)
+        actions.allowNotificationTransfer = allowList.notifications
+    }
+
+    private fun getMSTManager(): MediaSessionTransferManager {
+        return MediaSessionTransferManager(
+            applicationContext.getSystemService(MediaSessionManager::class.java),
+            ComponentName(applicationContext, NLService::class.java)
+        ).also { it.listen() }
     }
 }

@@ -25,17 +25,9 @@ fun AllowListColumn(
 ) {
     AllowanceCard(
         R.string.alw_media_sessions,
-        vm.allowList.mediaSessions,
-        { vm.setAllowance(AllowList::mediaSessions, it) },
+        vm.allowList.mediaSession,
+        { vm.setAllowance(AllowList::mediaSession, it) },
     ) {
-        Text(text = "efewfokofpOWVGOPWkgvpwokg")
-    }
-    AllowanceCard(
-        R.string.alw_notification_transfer,
-        vm.allowList.notificationTransfer,
-        { vm.setAllowance(AllowList::notificationTransfer, it) },
-    ) {
-        println("Recomposed")
         Text(text = "efewfokofpOWVGOPWkgvpwokg")
     }
 }

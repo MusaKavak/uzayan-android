@@ -1,7 +1,7 @@
 package dev.musakavak.uzayan.managers
 
+import android.content.ContentResolver
 import android.content.ContentUris
-import android.content.Context
 import android.database.Cursor
 import android.net.Uri
 import android.provider.MediaStore
@@ -11,7 +11,7 @@ import dev.musakavak.uzayan.socket.Emitter
 import dev.musakavak.uzayan.tools.Base64Tool
 import java.io.InputStream
 
-class ImageTransferManager(private val context: Context) {
+class ImageTransferManager(private val contentResolver: ContentResolver) {
     private val projection = arrayOf(
         MediaStore.Images.Media._ID,
         MediaStore.Images.Media.DISPLAY_NAME,
@@ -19,7 +19,6 @@ class ImageTransferManager(private val context: Context) {
         MediaStore.Images.Media.SIZE
     )
     private val imageTool = Base64Tool()
-    private val contentResolver = context.contentResolver
     private val supportedFormats = setOf("jpg", "jpeg", "png", "gif", "bmp", "webp")
     fun sendSlice(start: Int?, length: Int?) {
         if (start == null || length == null) return
@@ -37,7 +36,7 @@ class ImageTransferManager(private val context: Context) {
         if (id.isNullOrBlank()) return null
         id.toLongOrNull()?.let {
             val uri = getUri(it)
-            return context.contentResolver.openInputStream(uri)
+            return contentResolver.openInputStream(uri)
         }
         return null
     }
@@ -94,7 +93,7 @@ class ImageTransferManager(private val context: Context) {
     }
 
     private fun invokeCursor(callback: (cursor: Cursor) -> Unit) {
-        val cursor = context.contentResolver.query(
+        val cursor = contentResolver.query(
             MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
             projection,
             null,
