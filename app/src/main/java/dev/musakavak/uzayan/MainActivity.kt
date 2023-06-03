@@ -8,6 +8,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -33,18 +34,20 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         startForeground()
+        val padding = 16.dp
         setContent {
             UzayanTheme {
                 Surface(
                     modifier = Modifier
                         .fillMaxSize()
                         .background(MaterialTheme.colorScheme.background)
-                        .padding(15.dp),
+                        .padding(padding),
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         ConnectionStateCard(intent.data, getDeviceName())
+                        Spacer(Modifier.padding(padding))
                         val sp = getSharedPreferences("uzayan_allow_list", Context.MODE_PRIVATE)
-                        AllowListColumn(AllowListManager(sp))
+                        AllowListColumn(padding, AllowListManager(sp))
                     }
                 }
             }

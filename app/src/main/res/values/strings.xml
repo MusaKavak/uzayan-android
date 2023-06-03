@@ -2,9 +2,14 @@
     <string name="app_name">Uzayan</string>
     <string name="app_icon_description">App Icon</string>
     <string name="no_connection">No Connection</string>
-    <string name="alw_media_sessions">Media Sessions</string>
+    <string name="alw_file">Files</string>
+    <string name="alw_media_session">Media Sessions</string>
     <string name="alw_notifications">Notifications</string>
-    <string name="alw_notification_transfer">Notification Transfer</string>
-    <string name="alw_file_transfer">File Transfer</string>
-    <string name="alw_image_transfer">Image Transfer</string>
+    <string name="alw_notification_controls">Notification Controls</string>
+    <string name="alw_media_session_controls">Media Session Controls</string>
+    <string name="alw_rename_file">Rename Files</string>
+    <string name="alw_delete_file">Delete Files</string>
+    <string name="alw_send_file">Send Files</string>
+    <string name="alw_receive_file">Receive Files</string>
+
 </resources>
