@@ -15,7 +15,7 @@ class AllowListManager(private val sp: SharedPreferences) {
     }
 
     fun saveAllowList(allowList: AllowList) {
-        UzayanForegroundService.setActions(allowList)
+        UzayanForegroundService.setActionAllowList(allowList)
         val allowListString = Gson().toJson(allowList)
         sp.edit {
             putString("allow_list_json", allowListString)

@@ -7,6 +7,7 @@ import dev.musakavak.uzayan.managers.NotificationTransferManager
 class NLService : NotificationListenerService() {
 
     companion object {
+        var allowNotificationTransfer: Boolean = false
         var sendActiveNotifications: (() -> Unit) = {}
     }
 
@@ -23,14 +24,18 @@ class NLService : NotificationListenerService() {
     }
 
     override fun onNotificationPosted(sbn: StatusBarNotification?) {
-        sbn?.let {
-            notificationManager?.sendNotification(sbn)
+        if (allowNotificationTransfer) {
+            sbn?.let {
+                notificationManager?.sendNotification(sbn)
+            }
         }
     }
 
     override fun onNotificationRemoved(sbn: StatusBarNotification?) {
-        sbn?.let {
-            notificationManager?.sendRemoveNotification(it.key)
+        if (allowNotificationTransfer) {
+            sbn?.let {
+                notificationManager?.sendRemoveNotification(it.key)
+            }
         }
     }
 

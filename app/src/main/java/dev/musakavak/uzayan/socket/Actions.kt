@@ -18,13 +18,17 @@ class Actions {
     var fileTransferManager: FileTransferManager? = null
     var notificationManager: NotificationManager? = null
     var allowNotificationTransfer: Boolean = false
+    var allowNotificationControls: Boolean = false
+    var allowMediaSessionControls: Boolean = false
 
     fun mediaSessionControl(json: JSONObject) {
-        mediaSessionTransferManager?.mediaSessionControl(
-            json.getJSONObject("input").getString("token"),
-            json.getJSONObject("input").getString("action"),
-            json.getJSONObject("input").get("value"),
-        )
+        if (allowMediaSessionControls) {
+            mediaSessionTransferManager?.mediaSessionControl(
+                json.getJSONObject("input").getString("token"),
+                json.getJSONObject("input").getString("action"),
+                json.getJSONObject("input").get("value"),
+            )
+        }
     }
 
     fun mediaSessionRequest() {
@@ -32,7 +36,7 @@ class Actions {
     }
 
     fun notificationAction(json: JSONObject) {
-        if (allowNotificationTransfer) NotificationTransferManager.sendAction(
+        if (allowNotificationControls) NotificationTransferManager.sendAction(
             json.getJSONObject("input").getString("key"),
             json.getJSONObject("input").getString("action")
         )

@@ -19,7 +19,6 @@ import dev.musakavak.uzayan.socket.SocketServer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import dev.musakavak.uzayan.managers.NotificationManager as UznNotificationManager
 
 class UzayanForegroundService : Service() {
     private val channelId = "uzayan"
@@ -27,7 +26,7 @@ class UzayanForegroundService : Service() {
     private val actions = Actions()
 
     companion object {
-        var setActions: (allowList: AllowList) -> Unit = {}
+        var setActionAllowList: (allowList: AllowList) -> Unit = {}
     }
 
     override fun onBind(p0: Intent?): IBinder? {
@@ -43,31 +42,50 @@ class UzayanForegroundService : Service() {
         val notification = Notification.Builder(this, channelId)
             .build()
 
-        setActions = { setActions(it) }
+        setActionAllowList = { setActionAllowList(it) }
         startForeground(34724, notification)
         return super.onStartCommand(intent, flags, startId)
     }
 
     override fun onCreate() {
-        setActions(AllowList())
         CoroutineScope(Dispatchers.IO).launch { SocketServer(actions).initialize() }
     }
 
-    private fun setActions(allowList: AllowList) {
-        actions.mediaSessionTransferManager =
-            if (allowList.mediaSession) getMSTManager()
-            else null
+    private fun setActionAllowList(allowList: AllowList) {
+        setNotificationTransferAllowance(allowList)
+        setMediaSessionAllowance(allowList)
+        setFileAllowance(allowList)
+    }
+
+    private fun setFileAllowance(allowList: AllowList) {
         if (allowList.file) {
-            actions.fileManager = FileManager()
-            actions.fileTransferManager = FileTransferManager()
-            actions.imageTransferManager = ImageTransferManager(applicationContext.contentResolver)
+            if (actions.fileManager == null) actions.fileManager = FileManager()
+            if (actions.fileTransferManager == null) actions.fileTransferManager =
+                FileTransferManager()
+            if (actions.imageTransferManager == null) actions.imageTransferManager =
+                ImageTransferManager(applicationContext.contentResolver)
         } else {
             actions.fileManager = null
             actions.fileTransferManager = null
-            actions.imageTransferManager = null
         }
-        actions.notificationManager = UznNotificationManager(applicationContext)
+    }
+
+    private fun setMediaSessionAllowance(allowList: AllowList) {
+        if (allowList.mediaSession) {
+            if (actions.mediaSessionTransferManager == null)
+                actions.mediaSessionTransferManager = getMSTManager()
+            actions.allowMediaSessionControls = allowList.mediaSessionControl
+        } else {
+            actions.mediaSessionTransferManager = null
+            actions.allowMediaSessionControls = false
+        }
+    }
+
+    private fun setNotificationTransferAllowance(allowList: AllowList) {
+        NLService.allowNotificationTransfer = allowList.notifications
         actions.allowNotificationTransfer = allowList.notifications
+        actions.allowNotificationControls =
+            allowList.notifications && allowList.notificationControls
     }
 
     private fun getMSTManager(): MediaSessionTransferManager {
