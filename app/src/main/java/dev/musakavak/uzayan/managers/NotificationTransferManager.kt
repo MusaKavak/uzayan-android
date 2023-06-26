@@ -49,8 +49,8 @@ class NotificationTransferManager(private val context: Context) {
         Emitter.emit("Notifications", notifications)
     }
 
-    fun sendRemoveNotification(key: String) {
-        Emitter.emit("RemoveNotification", key)
+    fun sendRemoveNotification(key: String, groupKey: String) {
+        Emitter.emit("RemoveNotification", Notification(key,groupKey))
     }
 
     @Suppress("DEPRECATION")
@@ -59,7 +59,7 @@ class NotificationTransferManager(private val context: Context) {
         val extras = nf.extras
         return Notification(
             sbn.key,
-            sbn.packageName,
+            sbn.groupKey,
             getStringFromExtras(extras, "android.title"),
             getStringFromExtras(extras, "android.text"),
             getStringFromExtras(extras, "android.bigText"),
@@ -67,8 +67,6 @@ class NotificationTransferManager(private val context: Context) {
             base64Tool.fromIcon(nf.getLargeIcon(), context),
             base64Tool.fromIcon(nf.smallIcon, context),
             createNotificationActions(nf, sbn.key),
-            sbn.isGroup,
-            sbn.groupKey,
             extras.get("android.progressMax") as Int?,
             extras.get("android.progress") as Int?,
         )

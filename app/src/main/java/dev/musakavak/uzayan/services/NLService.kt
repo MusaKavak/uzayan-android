@@ -34,7 +34,7 @@ class NLService : NotificationListenerService() {
     override fun onNotificationRemoved(sbn: StatusBarNotification?) {
         if (allowNotificationTransfer) {
             sbn?.let {
-                notificationManager?.sendRemoveNotification(it.key)
+                notificationManager?.sendRemoveNotification(it.key,it.groupKey)
             }
         }
     }
