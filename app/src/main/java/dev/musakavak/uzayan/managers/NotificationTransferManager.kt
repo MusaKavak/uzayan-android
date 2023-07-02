@@ -57,6 +57,7 @@ class NotificationTransferManager(private val context: Context) {
     private fun createNotification(sbn: StatusBarNotification): Notification {
         val nf = sbn.notification
         val extras = nf.extras
+        nf.smallIcon
         return Notification(
             sbn.key,
             sbn.groupKey,
@@ -65,7 +66,6 @@ class NotificationTransferManager(private val context: Context) {
             getStringFromExtras(extras, "android.bigText"),
             getStringFromExtras(extras, "android.infoText"),
             base64Tool.fromIcon(nf.getLargeIcon(), context),
-            base64Tool.fromIcon(nf.smallIcon, context),
             createNotificationActions(nf, sbn.key),
             extras.get("android.progressMax") as Int?,
             extras.get("android.progress") as Int?,
