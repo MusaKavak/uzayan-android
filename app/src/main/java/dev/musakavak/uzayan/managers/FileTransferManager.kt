@@ -17,40 +17,39 @@ class FileTransferManager {
         size: Long?,
         socketIn: InputStream,
         socketOut: OutputStream
-    ) =
-        withContext(Dispatchers.IO) {
-            try {
-                if (fileIn == null || size == null) {
-                    socketOut.write(101)
-                    return@withContext
-                }
-                socketOut.write(100)
-                var bytesSent = 0L
-
-                val buf = ByteArray(chunkSize)
-
-                val progressTracker = launch(Dispatchers.IO) {
-                    while (true) {
-                        println((bytesSent.toFloat() / size * 100).toInt())
-                        if (bytesSent >= size) break
-                        delay(1000L)
-                    }
-                }
-
-                while (true) {
-                    val bytesRead = fileIn.read(buf)
-                    socketOut.write(buf, 0, bytesRead)
-                    bytesSent += bytesRead
-                    if (bytesSent >= size) break
-                }
-
-                fileIn.close()
-                socketIn.read()
-                progressTracker.cancelAndJoin()
-            } catch (e: Exception) {
-                println(e.message)
+    ) = withContext(Dispatchers.IO) {
+        try {
+            if (fileIn == null || size == null) {
+                socketOut.write(101)
+                return@withContext
             }
+            socketOut.write(100)
+            var bytesSent = 0L
+
+            val buf = ByteArray(chunkSize)
+
+            val progressTracker = launch(Dispatchers.IO) {
+                while (true) {
+                    println((bytesSent.toFloat() / size * 100).toInt())
+                    if (bytesSent >= size) break
+                    delay(1000L)
+                }
+            }
+
+            while (true) {
+                val bytesRead = fileIn.read(buf)
+                socketOut.write(buf, 0, bytesRead)
+                bytesSent += bytesRead
+                if (bytesSent >= size) break
+            }
+
+            fileIn.close()
+            socketIn.read()
+            progressTracker.cancelAndJoin()
+        } catch (e: Exception) {
+            println(e.message)
         }
+    }
 
     suspend fun createFile(
         path: String,

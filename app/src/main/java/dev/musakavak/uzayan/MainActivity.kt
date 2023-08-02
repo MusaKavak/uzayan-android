@@ -3,7 +3,6 @@ package dev.musakavak.uzayan
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -22,18 +21,14 @@ import dev.musakavak.uzayan.managers.AllowListManager
 import dev.musakavak.uzayan.services.UzayanForegroundService
 import dev.musakavak.uzayan.ui.theme.UzayanTheme
 
-class MainActivity : ComponentActivity() {
 
-//    private val request =
-//        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
-//            it.forEach { result ->
-//                println("Key ${result.key} value ${result.value}")
-//            }
-//        }
+class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        startForeground()
+
+        startService()
+
         val padding = 16.dp
         setContent {
             UzayanTheme {
@@ -44,7 +39,7 @@ class MainActivity : ComponentActivity() {
                         .padding(padding),
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        ConnectionStateCard(intent.data, getDeviceName())
+                        ConnectionStateCard()
                         Spacer(Modifier.padding(padding))
                         val sp = getSharedPreferences("uzayan_allow_list", Context.MODE_PRIVATE)
                         AllowListColumn(padding, AllowListManager(sp))
@@ -54,13 +49,29 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun startForeground() {
-        val intent = Intent(this, UzayanForegroundService::class.java)
-        startForegroundService(intent)
-    }
+    private fun startService() {
+        intent.data?.let {
+            val ip = it.getQueryParameter("ip")
+            val port = it.getQueryParameter("port")?.toIntOrNull()
+            val code = it.getQueryParameter("code")
+            val secure = it.getQueryParameter("secure")?.toBooleanStrictOrNull()
 
-    private fun getDeviceName(): String {
-        return Settings.Global.getString(contentResolver, Settings.Global.DEVICE_NAME)
+            if (ip != null && port != null && code != null && secure != null) {
+
+                stopService(Intent(this, UzayanForegroundService::class.java))
+
+                val intent = Intent(this, UzayanForegroundService::class.java).apply {
+                    putExtra("u-ip", ip)
+                    putExtra("u-port", port)
+                    putExtra("u-code", code)
+                    putExtra("u-secure", secure)
+                }
+
+                startForegroundService(intent)
+                //    PairTool().sendPairRequest(ip, port, code, deviceName)
+            }
+        }
+
     }
 }
 

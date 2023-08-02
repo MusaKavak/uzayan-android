@@ -1,6 +1,5 @@
 package dev.musakavak.uzayan.components
 
-import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,21 +18,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import dev.musakavak.uzayan.R
 import dev.musakavak.uzayan.socket.Emitter
-import dev.musakavak.uzayan.tools.PairTool
 
 @Composable
-fun ConnectionStateCard(urlArgs: Uri?, deviceName: String) {
-    urlArgs?.let {
-        val ip = it.getQueryParameter("ip")
-        val port = it.getQueryParameter("port")?.toIntOrNull()
-        val code = it.getQueryParameter("code")
-        val name = it.getQueryParameter("name")
-        if (ip != null && port != null && code != null) {
-            PairTool().sendPairRequest(ip, port, code, deviceName)
-            Emitter.connectedClientName = name
-        }
-    }
-
+fun ConnectionStateCard() {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,

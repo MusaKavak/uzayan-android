@@ -8,29 +8,32 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.media.session.MediaSessionManager
+import android.os.Bundle
 import android.os.IBinder
+import android.provider.Settings
+import android.util.Log
 import dev.musakavak.uzayan.managers.FileManager
 import dev.musakavak.uzayan.managers.FileTransferManager
 import dev.musakavak.uzayan.managers.ImageTransferManager
 import dev.musakavak.uzayan.managers.MediaSessionTransferManager
 import dev.musakavak.uzayan.models.AllowList
 import dev.musakavak.uzayan.socket.Actions
-import dev.musakavak.uzayan.socket.SocketServer
+import dev.musakavak.uzayan.socket.sendPairRequest
+import dev.musakavak.uzayan.socket.server.Server
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
 class UzayanForegroundService : Service() {
     private val channelId = "uzayan"
     private val channelName = "Uzayan Foreground"
     private val actions = Actions()
+    private var server: Server? = null
+    private val scope = CoroutineScope(Dispatchers.IO)
 
     companion object {
         var setActionAllowList: (allowList: AllowList) -> Unit = {}
-    }
-
-    override fun onBind(p0: Intent?): IBinder? {
-        return null
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -43,12 +46,33 @@ class UzayanForegroundService : Service() {
             .build()
 
         setActionAllowList = { setActionAllowList(it) }
+
         startForeground(34724, notification)
+        start(intent?.extras)
         return super.onStartCommand(intent, flags, startId)
     }
 
-    override fun onCreate() {
-        CoroutineScope(Dispatchers.IO).launch { SocketServer(actions).initialize() }
+    private fun start(extras: Bundle?) {
+        if (extras == null) {
+            stopForeground(STOP_FOREGROUND_REMOVE)
+            stopSelf()
+            return
+        }
+
+        val ip = extras.getString("u-ip")
+        val port = extras.getInt("u-port")
+        val code = extras.getString("u-code")
+        val secure = extras.getBoolean("u-secure")
+
+        if (ip != null && port != 0 && code != null) {
+            scope.launch {
+                server = Server(secure, actions)
+                Log.i(channelName, "Server running on port: ${server!!.port}")
+                server!!.listen()
+
+                sendPairRequest(ip, server!!.port, port, code, deviceName())
+            }
+        }
     }
 
     private fun setActionAllowList(allowList: AllowList) {
@@ -94,4 +118,20 @@ class UzayanForegroundService : Service() {
             ComponentName(applicationContext, NLService::class.java)
         ).also { it.listen() }
     }
+
+    private fun deviceName(): String {
+        return Settings.Global.getString(contentResolver, Settings.Global.DEVICE_NAME)
+    }
+
+    override fun onDestroy() {
+        server?.close()
+        scope.cancel()
+        Log.i(channelName, "Destroyed")
+        super.onDestroy()
+    }
+
+    override fun onBind(p0: Intent?): IBinder? {
+        return null
+    }
+
 }
