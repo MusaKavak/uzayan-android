@@ -66,11 +66,11 @@ class UzayanForegroundService : Service() {
 
         if (ip != null && port != 0 && code != null) {
             scope.launch {
-                server = Server(secure, actions)
+                server = Server(actions)
+                server!!.initialize(secure)
                 Log.i(channelName, "Server running on port: ${server!!.port}")
                 server!!.listen()
-
-                sendPairRequest(ip, server!!.port, port, code, deviceName())
+                sendPairRequest(ip, server!!.port!!, port, code, deviceName())
             }
         }
     }
