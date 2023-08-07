@@ -20,7 +20,10 @@ import dev.musakavak.uzayan.R
 import dev.musakavak.uzayan.socket.ConnectionState
 
 @Composable
-fun ConnectionStateCard(padding: Dp) {
+fun ConnectionStateCard(
+    padding: Dp,
+    startService: (String?, Int?, Int?, Boolean?) -> Unit
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth(),
@@ -30,7 +33,7 @@ fun ConnectionStateCard(padding: Dp) {
             modifier = Modifier.fillMaxWidth(),
         ) {
             if (ConnectionState.connectedClientName == null) {
-                ManualPairCard(padding)
+                ManualPairCard(padding, startService)
             }
         }
     }

@@ -33,6 +33,7 @@ import dev.musakavak.uzayan.view_models.PairInputViewModel
 @Composable
 fun ManualPairCard(
     padding: Dp,
+    startService: (String?, Int?, Int?, Boolean?) -> Unit,
     vm: PairInputViewModel = viewModel(PairInputViewModel::class.java)
 ) {
     Card(
@@ -53,7 +54,10 @@ fun ManualPairCard(
             vm.isCodeValid
         )
         Spacer(modifier = Modifier.height(16.dp))
-        Buttons()
+        Buttons(
+            { startService(vm.ipAddress, vm.port, vm.code, vm.isConnectionSecure) },
+            vm.isAllValid
+        )
     }
 }
 
@@ -145,17 +149,19 @@ fun PortAndCode(
 }
 
 @Composable
-fun Buttons() {
+fun Buttons(
+    startService: () -> Unit,
+    isAllValid: Boolean
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-
         OutlinedButton(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f),
-            onClick = { /*TODO Import Qr Code Scanner*/ }
+            onClick = { }
         ) {
             Icon(
                 imageVector = ImageVector.vectorResource(R.drawable.scan),
@@ -166,7 +172,12 @@ fun Buttons() {
             Text(text = "Scan", style = MaterialTheme.typography.headlineSmall)
         }
         Spacer(modifier = Modifier.width(16.dp))
-        Button(onClick = { /*TODO*/ }, modifier = Modifier.weight(1f)) {
+        Button(
+            onClick = {
+                if (isAllValid) startService()
+            }, enabled = isAllValid,
+            modifier = Modifier.weight(1f)
+        ) {
             Text(text = "Connect", style = MaterialTheme.typography.headlineSmall)
         }
     }

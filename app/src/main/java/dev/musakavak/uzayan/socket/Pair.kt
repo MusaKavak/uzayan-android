@@ -13,7 +13,7 @@ suspend fun sendPairRequest(
     ip: String,
     localPort: Int,
     destinationPort: Int,
-    pairCode: String,
+    pairCode: Int,
     name: String
 ) = withContext(Dispatchers.IO) {
 

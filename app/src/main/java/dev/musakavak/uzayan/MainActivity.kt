@@ -27,7 +27,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        startService()
+        readUriAndStartService()
 
         val padding = 16.dp
         setContent {
@@ -39,7 +39,7 @@ class MainActivity : ComponentActivity() {
                         .padding(padding),
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        ConnectionStateCard(padding)
+                        ConnectionStateCard(padding, ::startService)
                         Spacer(Modifier.padding(padding))
                         val sp = getSharedPreferences("uzayan_allow_list", Context.MODE_PRIVATE)
                         AllowListColumn(padding, AllowListManager(sp))
@@ -49,27 +49,34 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun startService() {
+    private fun readUriAndStartService() {
         intent.data?.let {
             val ip = it.getQueryParameter("ip")
             val port = it.getQueryParameter("port")?.toIntOrNull()
-            val code = it.getQueryParameter("code")
+            val code = it.getQueryParameter("code")?.toIntOrNull()
             val secure = it.getQueryParameter("secure")?.toBooleanStrictOrNull()
 
-            if (ip != null && port != null && code != null && secure != null) {
+            startService(ip, port, code, secure)
+        }
+    }
 
-                stopService(Intent(this, UzayanForegroundService::class.java))
+    private fun startService(
+        ip: String?,
+        port: Int?,
+        code: Int?,
+        secure: Boolean?
+    ) {
+        if (ip != null && port != null && code != null && secure != null) {
+            stopService(Intent(this, UzayanForegroundService::class.java))
 
-                val intent = Intent(this, UzayanForegroundService::class.java).apply {
-                    putExtra("u-ip", ip)
-                    putExtra("u-port", port)
-                    putExtra("u-code", code)
-                    putExtra("u-secure", secure)
-                }
-
-                startForegroundService(intent)
-                //    PairTool().sendPairRequest(ip, port, code, deviceName)
+            val intent = Intent(this, UzayanForegroundService::class.java).apply {
+                putExtra("u-ip", ip)
+                putExtra("u-port", port)
+                putExtra("u-code", code)
+                putExtra("u-secure", secure)
             }
+
+            startForegroundService(intent)
         }
     }
 }

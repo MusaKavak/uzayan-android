@@ -20,6 +20,7 @@ class PairInputViewModel : ViewModel() {
     fun sIpAddress(value: String) {
         ipAddress = value
         isIpAddressValid = value.matches(ipAddressRegex)
+        sAllValid()
     }
 
     //Port
@@ -32,6 +33,7 @@ class PairInputViewModel : ViewModel() {
         val v = value.toIntOrNull()
         port = v
         isPortValid = v != null && v <= 65535
+        sAllValid()
     }
 
     //Code
@@ -43,5 +45,16 @@ class PairInputViewModel : ViewModel() {
     fun sCode(value: String) {
         code = value.toIntOrNull()
         isCodeValid = value.length == 6
+        sAllValid()
     }
+
+    //All
+    var isAllValid by mutableStateOf(false)
+        private set
+
+    private fun sAllValid() {
+        isAllValid = isIpAddressValid && isPortValid && isCodeValid
+    }
+
+    private fun getPairParameters() {}
 }

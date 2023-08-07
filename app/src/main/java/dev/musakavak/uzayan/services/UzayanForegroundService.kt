@@ -61,10 +61,10 @@ class UzayanForegroundService : Service() {
 
         val ip = extras.getString("u-ip")
         val port = extras.getInt("u-port")
-        val code = extras.getString("u-code")
+        val code = extras.getInt("u-code")
         val secure = extras.getBoolean("u-secure")
 
-        if (ip != null && port != 0 && code != null) {
+        if (ip != null && port != 0 && code != 0) {
             scope.launch {
                 server = Server(actions)
                 server!!.initialize(secure)
