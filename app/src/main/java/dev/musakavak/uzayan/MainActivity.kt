@@ -39,7 +39,7 @@ class MainActivity : ComponentActivity() {
                         .padding(padding),
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        ConnectionStateCard()
+                        ConnectionStateCard(padding)
                         Spacer(Modifier.padding(padding))
                         val sp = getSharedPreferences("uzayan_allow_list", Context.MODE_PRIVATE)
                         AllowListColumn(padding, AllowListManager(sp))
@@ -71,7 +71,6 @@ class MainActivity : ComponentActivity() {
                 //    PairTool().sendPairRequest(ip, port, code, deviceName)
             }
         }
-
     }
 }
 

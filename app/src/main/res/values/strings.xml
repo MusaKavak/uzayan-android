@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Uzayan</string>
-    <string name="app_icon_description">App Icon</string>
+    <string name="fab_scan">Scan Qr Code</string>
+    <string name="app_icon_description">App Icon</string>s
     <string name="no_connection">No Connection</string>
     <string name="alw_file">Files</string>
     <string name="alw_media_session">Media Sessions</string>
@@ -11,5 +12,5 @@
     <string name="alw_delete_file">Delete Files</string>
     <string name="alw_send_file">Send Files</string>
     <string name="alw_receive_file">Receive Files</string>
-
+    <string name="secure_connection">Secure Connection</string>
 </resources>
