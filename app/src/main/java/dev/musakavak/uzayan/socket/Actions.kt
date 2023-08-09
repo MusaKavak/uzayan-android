@@ -5,7 +5,6 @@ import dev.musakavak.uzayan.managers.FileTransferManager
 import dev.musakavak.uzayan.managers.ImageTransferManager
 import dev.musakavak.uzayan.managers.MediaSessionTransferManager
 import dev.musakavak.uzayan.managers.NotificationManager
-import dev.musakavak.uzayan.managers.NotificationTransferManager
 import dev.musakavak.uzayan.services.NLService
 import org.json.JSONObject
 import java.io.InputStream
@@ -16,7 +15,7 @@ class Actions {
     var imageTransferManager: ImageTransferManager? = null
     var fileManager: FileManager? = null
     var fileTransferManager: FileTransferManager? = null
-    var notificationManager: NotificationManager? = null
+    private var notificationManager: NotificationManager? = null
     var allowNotificationTransfer: Boolean = false
     var allowNotificationControls: Boolean = false
     var allowMediaSessionControls: Boolean = false
@@ -36,14 +35,16 @@ class Actions {
     }
 
     fun notificationAction(json: JSONObject) {
-        if (allowNotificationControls) NotificationTransferManager.sendAction(
-            json.getJSONObject("input").getString("key"),
-            json.getJSONObject("input").getString("action")
-        )
+        if (allowNotificationControls) NLService.sendAction?.let {
+            it(
+                json.getJSONObject("input").getString("key"),
+                json.getJSONObject("input").getString("action")
+            )
+        }
     }
 
     fun notificationsRequest() {
-        if (allowNotificationTransfer) NLService.sendActiveNotifications()
+        if (allowNotificationTransfer) NLService.sendActiveNotifications?.let { it() }
     }
 
     fun imageThumbnailRequest(json: JSONObject) {
