@@ -38,7 +38,8 @@ class Actions {
         if (allowNotificationControls) NLService.sendAction?.let {
             it(
                 json.getJSONObject("input").getString("key"),
-                json.getJSONObject("input").getString("action")
+                json.getJSONObject("input").getString("action"),
+                json.getJSONObject("input").getString("input")
             )
         }
     }

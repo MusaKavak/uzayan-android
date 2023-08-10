@@ -1,5 +1,6 @@
 package dev.musakavak.uzayan.services
 
+import android.app.RemoteInput
 import android.content.Intent
 import android.os.Bundle
 import android.service.notification.NotificationListenerService
@@ -15,7 +16,7 @@ class NLService : NotificationListenerService() {
     companion object {
         var allowNotificationTransfer: Boolean = false
         var sendActiveNotifications: (() -> Unit)? = null
-        var sendAction: ((String, String) -> Unit)? = null
+        var sendAction: ((String, String, String?) -> Unit)? = null
     }
 
 
@@ -56,7 +57,10 @@ class NLService : NotificationListenerService() {
 
     private fun getNotificationActions(nf: AndroidNotification): List<String>? {
         return if (!nf.actions.isNullOrEmpty())
-            nf.actions.map { it.title.toString() }
+            nf.actions.map {
+                if (it.remoteInputs.isNullOrEmpty()) it.title.toString()
+                else "*REPLY*${it.title}"
+            }
         else null
     }
 
@@ -85,11 +89,42 @@ class NLService : NotificationListenerService() {
         Emitter.emit("Notifications", notifications)
     }
 
-    private fun sendAction(key: String, action: String) {
-        getActiveNotifications(arrayOf(key)).firstOrNull { it.key == key }?.let { sbn ->
-            sbn.notification.actions?.firstOrNull { it.title.toString() == action }
-                ?.actionIntent
-                ?.send(this, 0, Intent())
+    private fun sendAction(key: String, action: String, input: String?) {
+        val isReply = action.contains("*REPLY*")
+        val actionTitle =
+            if (isReply) action.substringAfter("*REPLY*")
+            else action
+
+        val actionObject = getActiveNotifications(arrayOf(key)).firstOrNull { it.key == key }
+            ?.let { sbn ->
+                sbn.notification.actions?.firstOrNull { it.title.toString() == actionTitle }
+            }
+
+        actionObject?.let { actionObj ->
+            if (!isReply) {
+                actionObj.actionIntent?.send()
+                return
+            }
+            if (!input.isNullOrEmpty() && !actionObj.remoteInputs.isNullOrEmpty()) {
+                val remoteInputs = mutableListOf<RemoteInput>()
+
+                val localIntent = Intent()
+                localIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                val localBundle = Bundle()
+
+                actionObj.remoteInputs.forEach {
+                    localBundle.putCharSequence(it.resultKey, input)
+                    remoteInputs.add(it)
+                }
+
+                RemoteInput.addResultsToIntent(
+                    remoteInputs.toTypedArray(),
+                    localIntent,
+                    localBundle
+                )
+
+                actionObj.actionIntent?.send(this, 0, localIntent)
+            }
         }
     }
 }
