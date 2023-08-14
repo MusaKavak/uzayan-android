@@ -2,7 +2,7 @@ package dev.musakavak.uzayan.socket
 
 import dev.musakavak.uzayan.managers.FileManager
 import dev.musakavak.uzayan.managers.FileTransferManager
-import dev.musakavak.uzayan.managers.ImageTransferManager
+import dev.musakavak.uzayan.managers.ImageThumbnailManager
 import dev.musakavak.uzayan.managers.MediaSessionTransferManager
 import dev.musakavak.uzayan.managers.NotificationManager
 import dev.musakavak.uzayan.services.NLService
@@ -12,7 +12,7 @@ import java.io.OutputStream
 
 class Actions {
     var mediaSessionTransferManager: MediaSessionTransferManager? = null
-    var imageTransferManager: ImageTransferManager? = null
+    var imageThumbnailManager: ImageThumbnailManager? = null
     var fileManager: FileManager? = null
     var fileTransferManager: FileTransferManager? = null
     private var notificationManager: NotificationManager? = null
@@ -49,7 +49,7 @@ class Actions {
     }
 
     fun imageThumbnailRequest(json: JSONObject) {
-        imageTransferManager?.sendSlice(
+        imageThumbnailManager?.sendSlice(
             json.getJSONObject("input").getInt("start"),
             json.getJSONObject("input").getInt("length"),
         )
@@ -66,7 +66,7 @@ class Actions {
         val size = json.getString("size").toLongOrNull()
         val fileInput: InputStream? = when (json.getString("transferType")) {
             "FileTransfer" -> fileManager?.getFileToSend(id)
-            "ImageTransfer" -> imageTransferManager?.getImageInputStream(id)
+            // "ImageTransfer" -> imageTransferManager?.getImageInputStream(id)
             else -> null
         }
 

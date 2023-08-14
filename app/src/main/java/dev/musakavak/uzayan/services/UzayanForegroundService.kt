@@ -14,7 +14,7 @@ import android.provider.Settings
 import android.util.Log
 import dev.musakavak.uzayan.managers.FileManager
 import dev.musakavak.uzayan.managers.FileTransferManager
-import dev.musakavak.uzayan.managers.ImageTransferManager
+import dev.musakavak.uzayan.managers.ImageThumbnailManager
 import dev.musakavak.uzayan.managers.MediaSessionTransferManager
 import dev.musakavak.uzayan.models.AllowList
 import dev.musakavak.uzayan.socket.Actions
@@ -86,8 +86,8 @@ class UzayanForegroundService : Service() {
             if (actions.fileManager == null) actions.fileManager = FileManager()
             if (actions.fileTransferManager == null) actions.fileTransferManager =
                 FileTransferManager()
-            if (actions.imageTransferManager == null) actions.imageTransferManager =
-                ImageTransferManager(applicationContext.contentResolver)
+            if (actions.imageThumbnailManager == null) actions.imageThumbnailManager =
+                ImageThumbnailManager(applicationContext.contentResolver)
         } else {
             actions.fileManager = null
             actions.fileTransferManager = null

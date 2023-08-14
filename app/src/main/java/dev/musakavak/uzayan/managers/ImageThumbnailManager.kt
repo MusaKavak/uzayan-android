@@ -9,17 +9,11 @@ import android.util.Size
 import dev.musakavak.uzayan.models.ImageThumbnail
 import dev.musakavak.uzayan.socket.Emitter
 import dev.musakavak.uzayan.tools.Base64Tool
-import java.io.InputStream
 
-class ImageTransferManager(private val contentResolver: ContentResolver) {
-    private val projection = arrayOf(
-        MediaStore.Images.Media._ID,
-        MediaStore.Images.Media.DISPLAY_NAME,
-        MediaStore.Images.Media.DATE_ADDED,
-        MediaStore.Images.Media.SIZE
-    )
-    private val imageTool = Base64Tool()
+class ImageThumbnailManager(private val contentResolver: ContentResolver) {
+    private val base64Tool = Base64Tool()
     private val supportedFormats = setOf("jpg", "jpeg", "png", "gif", "bmp", "webp")
+
     fun sendSlice(start: Int?, length: Int?) {
         if (start == null || length == null) return
         invokeCursor {
@@ -32,15 +26,6 @@ class ImageTransferManager(private val contentResolver: ContentResolver) {
         }
     }
 
-    fun getImageInputStream(id: String?): InputStream? {
-        if (id.isNullOrBlank()) return null
-        id.toLongOrNull()?.let {
-            val uri = getUri(it)
-            return contentResolver.openInputStream(uri)
-        }
-        return null
-    }
-
     private fun sendThumbnail(cursor: Cursor) {
         val thumbnail = getThumbnail(cursor)
         thumbnail?.let {
@@ -49,26 +34,13 @@ class ImageTransferManager(private val contentResolver: ContentResolver) {
     }
 
     private fun getThumbnail(cursor: Cursor): ImageThumbnail? {
-        val name =
-            cursor.getString(
-                cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME)
-            )
-
-        val imageFormat = name.substringAfterLast('.', "").lowercase()
+        val name = cursor.getString(0)
+        val imageFormat = name.substringAfterLast('.').lowercase()
         if (!supportedFormats.contains(imageFormat)) return null
 
-        val id = cursor.getLong(
-            cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
-        )
-
-        val date =
-            cursor.getLong(
-                cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_ADDED)
-            )
-        val size =
-            cursor.getLong(
-                cursor.getColumnIndexOrThrow(MediaStore.Images.Media.SIZE)
-            )
+        val path = cursor.getString(1)
+        val id = cursor.getLong(2)
+        val date = cursor.getLong(3)
 
         val thumbnail = contentResolver.loadThumbnail(
             getUri(id),
@@ -76,12 +48,11 @@ class ImageTransferManager(private val contentResolver: ContentResolver) {
         )
 
         return ImageThumbnail(
-            id.toString(),
-            imageTool.fromBitmap(thumbnail),
             name,
+            base64Tool.fromBitmap(thumbnail)!!,
+            path,
             cursor.position,
-            date,
-            size
+            date
         )
     }
 
@@ -93,6 +64,13 @@ class ImageTransferManager(private val contentResolver: ContentResolver) {
     }
 
     private fun invokeCursor(callback: (cursor: Cursor) -> Unit) {
+        val projection = arrayOf(
+            MediaStore.Images.Media.DISPLAY_NAME,
+            MediaStore.Images.Media.DATA,
+            MediaStore.Images.Media._ID,
+            MediaStore.Images.Media.DATE_ADDED,
+        )
+
         val cursor = contentResolver.query(
             MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
             projection,
