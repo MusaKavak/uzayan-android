@@ -8,9 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import org.json.JSONObject
-import java.io.BufferedReader
 import java.io.InputStream
-import java.io.InputStreamReader
 import java.io.OutputStream
 import java.io.PrintWriter
 import java.net.ServerSocket
@@ -60,16 +58,16 @@ class Server(private val actions: Actions) {
                             listenMainStream(inS, actions)
                         }
 
-                        StreamType.FILE_INPUT.code -> listenFileStream(
+                        StreamType.SEND_FILE.code -> listenFileStream(
                             inS,
                             outS,
-                            actions::createFileRequest
+                            actions::sendFile
                         )
 
-                        StreamType.FILE_OUTPUT.code -> listenFileStream(
+                        StreamType.RECEIVE_FILE.code -> listenFileStream(
                             inS,
                             outS,
-                            actions::fileRequest
+                            actions::receiveFile
                         )
 
                         else -> {}
@@ -86,20 +84,18 @@ class Server(private val actions: Actions) {
     }
 
     private fun listenMainStream(inS: InputStream, actions: Actions) {
-        BufferedReader(InputStreamReader(inS)).use { buffer ->
-            buffer.lineSequence().forEach {
-                val json = JSONObject(it)
-                when (json.get("message")) {
-                    "MediaSessionControl" -> actions.mediaSessionControl(json)
-                    "MediaSessionsRequest" -> actions.mediaSessionRequest()
-                    "NotificationAction" -> actions.notificationAction(json)
-                    "NotificationsRequest" -> actions.notificationsRequest()
-                    "ImageThumbnailRequest" -> actions.imageThumbnailRequest(json)
-                    "FileSystemRequest" -> actions.fileSystemRequest(json)
-                    "DeleteFileRequest" -> actions.deleteFileRequest(json)
-                    "MoveFileRequest" -> actions.moveFileRequest(json)
-                    else -> println("Message Not Found")
-                }
+        inS.bufferedReader().lineSequence().forEach {
+            val json = JSONObject(it)
+            when (json.get("message")) {
+                "MediaSessionControl" -> actions.mediaSessionControl(json)
+                "MediaSessionsRequest" -> actions.mediaSessionRequest()
+                "NotificationAction" -> actions.notificationAction(json)
+                "NotificationsRequest" -> actions.notificationsRequest()
+                "ImageThumbnailRequest" -> actions.imageThumbnailRequest(json)
+                "FileSystemRequest" -> actions.fileSystemRequest(json)
+                "DeleteFileRequest" -> actions.deleteFileRequest(json)
+                "MoveFileRequest" -> actions.moveFileRequest(json)
+                else -> println("Message Not Found")
             }
         }
     }
@@ -108,16 +104,14 @@ class Server(private val actions: Actions) {
         inS: InputStream,
         outS: OutputStream,
         action: suspend (
-            j: JSONObject,
+            p: String,
             i: InputStream,
             o: OutputStream
         ) -> Unit
     ) {
-        while (true) {
-            val message =
-                BufferedReader(InputStreamReader(inS)).readLine()
-            if (message == "done") break
-            action(JSONObject(message), inS, outS)
+        inS.bufferedReader().lineSequence().forEach {
+            if (it.isNotEmpty() || it != "***DONE***")
+                action(it, inS, outS)
         }
     }
 
@@ -128,7 +122,7 @@ class Server(private val actions: Actions) {
 
     private enum class StreamType(val code: Int) {
         MAIN(200),
-        FILE_OUTPUT(201),
-        FILE_INPUT(202)
+        SEND_FILE(201),
+        RECEIVE_FILE(202)
     }
 }

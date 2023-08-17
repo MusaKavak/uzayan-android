@@ -12,40 +12,42 @@ import java.io.OutputStream
 class FileTransferManager {
     private val chunkSize = 4096
 
-    suspend fun sendFromInputStream(
-        fileIn: InputStream?,
-        size: Long?,
+    suspend fun sendFile(
+        path: String,
         socketIn: InputStream,
         socketOut: OutputStream
     ) = withContext(Dispatchers.IO) {
         try {
-            if (fileIn == null || size == null) {
-                socketOut.write(101)
-                return@withContext
-            }
-            socketOut.write(100)
+            val file = File(path)
+            if (!file.exists()) return@withContext
+            val fileSize = file.length()
+            socketOut.write("$fileSize".toByteArray())
+
+
+//
+//            val progressTracker = launch(Dispatchers.IO) {
+//                while (true) {
+//                    println((bytesSent.toFloat() / size * 100).toInt())
+//                    if (bytesSent >= size) break
+//                    delay(1000L)
+//                }
+//            }
+            val buf = ByteArray(chunkSize)
             var bytesSent = 0L
 
-            val buf = ByteArray(chunkSize)
+            val fileIn = file.inputStream()
 
-            val progressTracker = launch(Dispatchers.IO) {
-                while (true) {
-                    println((bytesSent.toFloat() / size * 100).toInt())
-                    if (bytesSent >= size) break
-                    delay(1000L)
-                }
-            }
-
-            while (true) {
+            while (bytesSent < fileSize) {
                 val bytesRead = fileIn.read(buf)
                 socketOut.write(buf, 0, bytesRead)
                 bytesSent += bytesRead
-                if (bytesSent >= size) break
             }
 
+            println("File Sent")
+//
             fileIn.close()
-            socketIn.read()
-            progressTracker.cancelAndJoin()
+//            socketIn.read()
+//            progressTracker.cancelAndJoin()
         } catch (e: Exception) {
             println(e.message)
         }

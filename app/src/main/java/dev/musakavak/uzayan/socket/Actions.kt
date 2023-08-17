@@ -61,20 +61,21 @@ class Actions {
         )
     }
 
-    suspend fun fileRequest(json: JSONObject, input: InputStream, output: OutputStream) {
-        val id = json.getString("id")
-        val size = json.getString("size").toLongOrNull()
-        val fileInput: InputStream? = when (json.getString("transferType")) {
-            "FileTransfer" -> fileManager?.getFileToSend(id)
-            // "ImageTransfer" -> imageTransferManager?.getImageInputStream(id)
-            else -> null
-        }
-
-        fileTransferManager?.sendFromInputStream(
-            fileInput,
-            size,
+    suspend fun sendFile(path: String, input: InputStream, output: OutputStream) {
+        fileTransferManager?.sendFile(
+            path,
             input,
             output,
+        )
+    }
+
+    suspend fun receiveFile(path: String, input: InputStream, output: OutputStream) {
+        fileTransferManager?.createFile(
+            path,
+            0,
+            input,
+            output,
+            notificationManager
         )
     }
 
@@ -91,13 +92,4 @@ class Actions {
         )
     }
 
-    suspend fun createFileRequest(json: JSONObject, input: InputStream, output: OutputStream) {
-        fileTransferManager?.createFile(
-            json.getString("path"),
-            json.getLong("size"),
-            input,
-            output,
-            notificationManager
-        )
-    }
 }
