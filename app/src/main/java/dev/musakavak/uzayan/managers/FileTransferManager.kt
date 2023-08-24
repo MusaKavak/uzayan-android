@@ -1,5 +1,6 @@
 package dev.musakavak.uzayan.managers
 
+import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
@@ -10,11 +11,9 @@ import java.io.InputStream
 import java.io.OutputStream
 
 class FileTransferManager {
-    private val chunkSize = 4096
 
     suspend fun sendFile(
         path: String,
-        socketIn: InputStream,
         socketOut: OutputStream
     ) = withContext(Dispatchers.IO) {
         try {
@@ -32,7 +31,7 @@ class FileTransferManager {
 //                    delay(1000L)
 //                }
 //            }
-            val buf = ByteArray(chunkSize)
+            val buf = ByteArray(4096)
             var bytesSent = 0L
 
             val fileIn = file.inputStream()
@@ -53,57 +52,52 @@ class FileTransferManager {
         }
     }
 
-    suspend fun createFile(
+    suspend fun receiveFile(
         path: String,
         size: Long,
-        input: InputStream,
-        output: OutputStream,
-        notificationManager: NotificationManager?
+        socketIn: InputStream,
+        socketOut: OutputStream,
     ) = withContext(Dispatchers.IO) {
         try {
             val fileToCreate = File(path)
-            if (fileToCreate.exists()) {
-                output.write(101)
-                return@withContext
-            }
-            fileToCreate.createNewFile()
-            if (!fileToCreate.canWrite()) {
-                output.write(102)
-                return@withContext
-            }
-            val fileOutput = fileToCreate.outputStream()
-            val buffer = ByteArray(chunkSize)
-            var bytesReceived: Long = 0
-            val nf = notificationManager?.createFileTransferNotification(
-                "Receiving ${fileToCreate.name}",
-                "${fileToCreate.name} Received"
-            )
 
-            output.write(100)
+            if (fileToCreate.createNewFile()) {
+                socketOut.write(100)
+            } else {
+                socketOut.write(101)
+            }
+
+            val fileOutput = fileToCreate.outputStream()
+            var bytesReceived: Long = 0
 
             val progressTracker = launch(Dispatchers.IO) {
-                nf?.let {
-                    while (true) {
-                        nf((bytesReceived.toFloat() / size * 100).toInt())
-                        if (bytesReceived >= size) break
-                        delay(1000L)
+                while (true) {
+                    val progress = ((bytesReceived.toFloat() / size.toFloat() * 100.0).toInt())
+                    println("progress:$progress")
+                    if (progress >= 99) {
+                        println("$bytesReceived / $size")
+                        break
                     }
+                    delay(1000L)
                 }
             }
 
+            val buffer = ByteArray(4096)
             while (true) {
-                val bytesRead = input.read(buffer)
+                val bytesRead = socketIn.read(buffer)
                 fileOutput.write(buffer, 0, bytesRead)
                 bytesReceived += bytesRead
-                if (bytesReceived >= size) break
+                if (bytesReceived >= size) {
+                    size
+                    break
+                }
             }
 
             fileOutput.close()
             progressTracker.cancelAndJoin()
-            nf?.let { it(100) }
-            output.write(99)
+            socketOut.write(100)
         } catch (e: Exception) {
-            println(e)
+            Log.e("FileDown", "Error", e)
         }
     }
 }

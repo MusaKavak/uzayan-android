@@ -110,7 +110,7 @@ class Server(private val actions: Actions) {
         ) -> Unit
     ) {
         inS.bufferedReader().lineSequence().forEach {
-            if (it.isNotEmpty() || it != "***DONE***")
+            if (it.isNotEmpty() && it != "***DONE***")
                 action(it, inS, outS)
         }
     }

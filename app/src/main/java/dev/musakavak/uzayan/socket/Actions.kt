@@ -64,18 +64,19 @@ class Actions {
     suspend fun sendFile(path: String, input: InputStream, output: OutputStream) {
         fileTransferManager?.sendFile(
             path,
-            input,
             output,
         )
     }
 
-    suspend fun receiveFile(path: String, input: InputStream, output: OutputStream) {
-        fileTransferManager?.createFile(
+    suspend fun receiveFile(json: String, input: InputStream, output: OutputStream) {
+        val jsonObject = JSONObject(json)
+        val path = jsonObject.getString("path")
+        val size = jsonObject.getLong("size")
+        fileTransferManager?.receiveFile(
             path,
-            0,
+            size,
             input,
             output,
-            notificationManager
         )
     }
 
