@@ -3,6 +3,8 @@
     <string name="fab_scan">Scan Qr Code</string>
     <string name="app_icon_description">App Icon</string>s
     <string name="no_connection">No Connection</string>
+    <string name="connected_to">Connected to:</string>
+    <string name="unknown">Unknown</string>
     <string name="alw_file">Files</string>
     <string name="alw_media_session">Media Sessions</string>
     <string name="alw_notifications">Notifications</string>
@@ -13,4 +15,9 @@
     <string name="alw_send_file">Send Files</string>
     <string name="alw_receive_file">Receive Files</string>
     <string name="secure_connection">Secure Connection</string>
+    <string name="cs_creating">Creating Server</string>
+    <string name="cs_sending_request">Sending Request</string>
+    <string name="cs_waiting_client">Waiting For Client</string>
+    <string name="connection_secure">Connection is secure</string>
+    <string name="connection_not_secure">Connection is not secure</string>
 </resources>

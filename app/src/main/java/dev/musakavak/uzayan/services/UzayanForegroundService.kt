@@ -12,18 +12,22 @@ import android.os.Bundle
 import android.os.IBinder
 import android.provider.Settings
 import android.util.Log
+import dev.musakavak.uzayan.R
 import dev.musakavak.uzayan.managers.FileManager
 import dev.musakavak.uzayan.managers.FileTransferManager
 import dev.musakavak.uzayan.managers.ImageThumbnailManager
 import dev.musakavak.uzayan.managers.MediaSessionTransferManager
 import dev.musakavak.uzayan.models.AllowList
 import dev.musakavak.uzayan.socket.Actions
+import dev.musakavak.uzayan.socket.ConnectionState
 import dev.musakavak.uzayan.socket.sendPairRequest
 import dev.musakavak.uzayan.socket.server.Server
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class UzayanForegroundService : Service() {
     private val channelId = "uzayan"
@@ -67,10 +71,21 @@ class UzayanForegroundService : Service() {
         if (ip != null && port != 0 && code != 0) {
             scope.launch {
                 server = Server(actions)
-                server!!.initialize(secure)
-                Log.i(channelName, "Server running on port: ${server!!.port}")
+                ConnectionState.currentStatus = 201
+                ConnectionState.connectingStatus = R.string.cs_creating
+                withContext(Dispatchers.Default) {
+                    server!!.initialize(secure)
+                    Log.i(channelName, "Server running on port: ${server!!.port}")
+                    delay(10000)
+                }
                 server!!.listen()
-                sendPairRequest(ip, server!!.port!!, port, code, deviceName())
+                ConnectionState.connectingStatus = R.string.cs_sending_request
+                try {
+                    sendPairRequest(ip, server!!.port!!, port, code, deviceName())
+                } catch (e: Exception) {
+                    e
+                }
+                ConnectionState.connectingStatus = R.string.cs_waiting_client
             }
         }
     }

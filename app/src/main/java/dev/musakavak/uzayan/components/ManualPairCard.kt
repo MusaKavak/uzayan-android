@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
@@ -24,7 +23,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.musakavak.uzayan.R
@@ -32,14 +30,12 @@ import dev.musakavak.uzayan.view_models.PairInputViewModel
 
 @Composable
 fun ManualPairCard(
-    padding: Dp,
     startService: (String?, Int?, Int?, Boolean?) -> Unit,
     vm: PairInputViewModel = viewModel(PairInputViewModel::class.java)
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(padding)
     ) {
         SecureConnection(vm.isConnectionSecure) { vm.isConnectionSecure = it }
         Spacer(modifier = Modifier.height(16.dp))

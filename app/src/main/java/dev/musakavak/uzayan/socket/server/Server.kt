@@ -2,6 +2,7 @@ package dev.musakavak.uzayan.socket.server
 
 import android.util.Log
 import dev.musakavak.uzayan.socket.Actions
+import dev.musakavak.uzayan.socket.ConnectionState
 import dev.musakavak.uzayan.socket.Emitter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -84,6 +85,9 @@ class Server(private val actions: Actions) {
     }
 
     private fun listenMainStream(inS: InputStream, actions: Actions) {
+        ConnectionState.connectingStatus = null
+        ConnectionState.currentStatus = 202
+        ConnectionState.isConnectionSecure = false
         inS.bufferedReader().lineSequence().forEach {
             val json = JSONObject(it)
             when (json.get("message")) {
@@ -98,6 +102,9 @@ class Server(private val actions: Actions) {
                 else -> println("Message Not Found")
             }
         }
+        ConnectionState.connectedClientName = null
+        ConnectionState.isConnectionSecure = null
+        ConnectionState.currentStatus = 200
     }
 
     private suspend fun listenFileStream(
