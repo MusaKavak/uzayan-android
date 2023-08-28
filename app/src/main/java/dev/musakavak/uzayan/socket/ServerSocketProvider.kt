@@ -1,4 +1,4 @@
-package dev.musakavak.uzayan.socket.server
+package dev.musakavak.uzayan.socket
 
 import android.annotation.SuppressLint
 import org.bouncycastle.asn1.x500.X500NameBuilder

@@ -20,12 +20,11 @@ import dev.musakavak.uzayan.managers.MediaSessionTransferManager
 import dev.musakavak.uzayan.models.AllowList
 import dev.musakavak.uzayan.socket.Actions
 import dev.musakavak.uzayan.socket.ConnectionState
+import dev.musakavak.uzayan.socket.Server
 import dev.musakavak.uzayan.socket.sendPairRequest
-import dev.musakavak.uzayan.socket.server.Server
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -73,10 +72,10 @@ class UzayanForegroundService : Service() {
                 server = Server(actions)
                 ConnectionState.currentStatus = 201
                 ConnectionState.connectingStatus = R.string.cs_creating
+                ConnectionState.isConnectionSecure = secure
                 withContext(Dispatchers.Default) {
                     server!!.initialize(secure)
                     Log.i(channelName, "Server running on port: ${server!!.port}")
-                    delay(10000)
                 }
                 server!!.listen()
                 ConnectionState.connectingStatus = R.string.cs_sending_request
