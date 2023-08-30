@@ -10,5 +10,6 @@ class ConnectionState {
         var connectedClientName by mutableStateOf<String?>(null)
         var isConnectionSecure by mutableStateOf<Boolean?>(null)
         var connectingStatus by mutableStateOf<Int?>(null)
+        var remoteCommands by mutableStateOf<List<String>?>(null)
     }
 }

@@ -93,6 +93,17 @@ class Server(private val actions: Actions) {
                 "FileSystemRequest" -> actions.fileSystemRequest(json)
                 "DeleteFileRequest" -> actions.deleteFileRequest(json)
                 "MoveFileRequest" -> actions.moveFileRequest(json)
+                "RemoteCommands" -> {
+                    val commandsList = json.getJSONObject("input").getJSONArray("commands")
+                    val commands = mutableListOf<String>()
+                    for (i in 0 until commandsList.length()) {
+                        val name = commandsList.getString(i)
+                        commands.add(name)
+                        println(name)
+                    }
+                    ConnectionState.remoteCommands = commands
+                }
+
                 "DeviceInfo" -> {
                     ConnectionState.connectedClientName =
                         json.getJSONObject("input").getString("name")
@@ -105,6 +116,7 @@ class Server(private val actions: Actions) {
         }
         ConnectionState.connectedClientName = null
         ConnectionState.isConnectionSecure = null
+        ConnectionState.remoteCommands = null
         ConnectionState.currentStatus = 200
     }
 

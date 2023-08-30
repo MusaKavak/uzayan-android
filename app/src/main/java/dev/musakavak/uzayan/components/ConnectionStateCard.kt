@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -23,7 +24,8 @@ import dev.musakavak.uzayan.socket.ConnectionState
 @Composable
 fun ConnectionStateCard(
     padding: Dp,
-    startService: (String?, Int?, Int?, Boolean?) -> Unit
+    startService: (String?, Int?, Int?, Boolean?) -> Unit,
+    setSheetContent: (String) -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -38,7 +40,7 @@ fun ConnectionStateCard(
             when (ConnectionState.currentStatus) {
                 200 -> ManualPairCard(startService)
                 201 -> ConnectingStatus(padding)
-                202 -> ConnectedDeviceCard(padding)
+                202 -> ConnectedDeviceCard(padding, setSheetContent)
             }
         }
     }
@@ -58,27 +60,45 @@ fun ConnectingStatus(padding: Dp) {
 }
 
 @Composable
-fun ConnectedDeviceCard(padding: Dp) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Row(modifier = Modifier.fillMaxHeight(), verticalAlignment = Alignment.CenterVertically) {
-            AppIcon(padding)
-            ConnectedClientName()
+fun ConnectedDeviceCard(padding: Dp, setSheetContent: (String) -> Unit) {
+    Column(modifier = Modifier.fillMaxHeight()) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(
+                modifier = Modifier.fillMaxHeight(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                AppIcon(padding)
+                ConnectedClientName()
+            }
+            ConnectionState.isConnectionSecure?.let {
+                val painter =
+                    painterResource(if (it) R.drawable.lock else R.drawable.lock_open)
+                val description =
+                    stringResource(if (it) R.string.connection_secure else R.string.connection_not_secure)
+                val tint =
+                    if (it) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+                Icon(
+                    painter = painter,
+                    contentDescription = description,
+                    tint = tint,
+                )
+            }
         }
-        ConnectionState.isConnectionSecure?.let {
-            val painter =
-                painterResource(if (it) R.drawable.lock else R.drawable.lock_open)
-            val description =
-                stringResource(if (it) R.string.connection_secure else R.string.connection_not_secure)
-            val tint =
-                if (it) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
-            Icon(
-                painter = painter,
-                contentDescription = description,
-                tint = tint,
+        Row(modifier = Modifier.fillMaxWidth()) {
+            AssistChip(onClick = { setSheetContent("commands") },
+                leadingIcon = {
+                    Icon(
+                        painter = painterResource(R.drawable.terminal),
+                        contentDescription = stringResource(R.string.remote_commands)
+                    )
+                },
+                label = {
+                    Text(text = stringResource(R.string.remote_commands))
+                }
             )
         }
     }

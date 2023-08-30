@@ -5,25 +5,33 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.BottomSheetScaffold
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Surface
+import androidx.compose.material3.rememberBottomSheetScaffoldState
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.musakavak.uzayan.components.AllowListColumn
 import dev.musakavak.uzayan.components.ConnectionStateCard
+import dev.musakavak.uzayan.components.RemoteCommandsCard
 import dev.musakavak.uzayan.managers.AllowListManager
 import dev.musakavak.uzayan.services.UzayanForegroundService
 import dev.musakavak.uzayan.ui.theme.UzayanTheme
+import kotlinx.coroutines.launch
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,21 +41,42 @@ class MainActivity : ComponentActivity() {
 
         val padding = 16.dp
         setContent {
+            val bottomSheetState = rememberModalBottomSheetState()
+            val scaffoldState = rememberBottomSheetScaffoldState(bottomSheetState)
+            val (sheetContent, setSheetC) = remember { mutableStateOf("") }
+
+            val scope = rememberCoroutineScope()
+
+            val setSheetContent: (String) -> Unit = {
+                setSheetC(it)
+                scope.launch { bottomSheetState.expand() }
+            }
+
             UzayanTheme {
-                Surface(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.background)
-                        .padding(padding),
+                BottomSheetScaffold(
+                    scaffoldState = scaffoldState,
+                    sheetContent = {
+                        when (sheetContent) {
+                            "commands" -> {
+                                RemoteCommandsCard(padding)
+                            }
+                        }
+                    }
                 ) {
-                    Column(
-                        modifier = Modifier.verticalScroll(rememberScrollState()),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(padding)
                     ) {
-                        ConnectionStateCard(padding, ::startService)
-                        Spacer(Modifier.padding(padding))
-                        val sp = getSharedPreferences("uzayan_allow_list", Context.MODE_PRIVATE)
-                        AllowListColumn(padding, AllowListManager(sp))
+                        Column(
+                            modifier = Modifier.verticalScroll(rememberScrollState()),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            ConnectionStateCard(padding, ::startService, setSheetContent)
+                            Spacer(Modifier.padding(padding))
+                            val sp = getSharedPreferences("uzayan_allow_list", Context.MODE_PRIVATE)
+                            AllowListColumn(padding, AllowListManager(sp))
+                        }
                     }
                 }
             }
