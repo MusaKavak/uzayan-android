@@ -1,4 +1,4 @@
-package dev.musakavak.uzayan
+package dev.musakavak.uzayan.view_models
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider

@@ -100,6 +100,17 @@ fun ConnectedDeviceCard(padding: Dp, setSheetContent: (String) -> Unit) {
                     Text(text = stringResource(R.string.remote_commands))
                 }
             )
+            AssistChip(onClick = { setSheetContent("screencast") },
+                leadingIcon = {
+                    Icon(
+                        painter = painterResource(R.drawable.terminal),
+                        contentDescription = stringResource(R.string.screencast)
+                    )
+                },
+                label = {
+                    Text(text = stringResource(R.string.screencast))
+                }
+            )
         }
     }
 }

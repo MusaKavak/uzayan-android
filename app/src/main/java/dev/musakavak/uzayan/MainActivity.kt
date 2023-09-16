@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import dev.musakavak.uzayan.components.AllowListColumn
 import dev.musakavak.uzayan.components.ConnectionStateCard
 import dev.musakavak.uzayan.components.RemoteCommandsCard
+import dev.musakavak.uzayan.components.ScreenCastLauncher
 import dev.musakavak.uzayan.managers.AllowListManager
 import dev.musakavak.uzayan.services.UzayanForegroundService
 import dev.musakavak.uzayan.ui.theme.UzayanTheme
@@ -62,6 +63,10 @@ class MainActivity : ComponentActivity() {
                         when (sheetContent) {
                             "commands" -> {
                                 RemoteCommandsCard(padding)
+                            }
+
+                            "screencast" -> {
+                                ScreenCastLauncher()
                             }
                         }
                     }

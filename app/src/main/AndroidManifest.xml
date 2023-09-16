@@ -18,11 +18,17 @@
         android:theme="@style/Theme.Uzayan"
         tools:targetApi="31">
         <activity
+            android:name=".ScreenCastActivity"
+            android:exported="false"
+            android:label="@string/title_activity_screen_cast"
+            android:theme="@style/Theme.Uzayan" />
+        <activity
             android:name=".MainActivity"
             android:exported="true"
             android:theme="@style/Theme.Uzayan">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <intent-filter>

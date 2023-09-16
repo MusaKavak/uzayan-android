@@ -22,11 +22,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import dev.musakavak.uzayan.AllowListVMFactory
-import dev.musakavak.uzayan.AllowListViewModel
 import dev.musakavak.uzayan.R
 import dev.musakavak.uzayan.managers.AllowListManager
 import dev.musakavak.uzayan.models.AllowList
+import dev.musakavak.uzayan.view_models.AllowListVMFactory
+import dev.musakavak.uzayan.view_models.AllowListViewModel
 
 @Composable
 fun AllowListColumn(
