@@ -13,6 +13,7 @@ import android.os.IBinder
 import android.provider.Settings
 import android.util.Log
 import dev.musakavak.uzayan.R
+import dev.musakavak.uzayan.managers.AllowListManager
 import dev.musakavak.uzayan.managers.FileManager
 import dev.musakavak.uzayan.managers.FileTransferManager
 import dev.musakavak.uzayan.managers.ImageThumbnailManager
@@ -68,6 +69,7 @@ class UzayanForegroundService : Service() {
         val secure = extras.getBoolean("u-secure")
 
         if (ip != null && port != 0 && code != 0) {
+            initActionAllowlist()
             scope.launch {
                 server = Server(actions)
                 ConnectionState.currentStatus = 201
@@ -82,11 +84,16 @@ class UzayanForegroundService : Service() {
                 try {
                     sendPairRequest(ip, server!!.port!!, port, code, deviceName())
                 } catch (e: Exception) {
-                    e
+                    Log.e("PairException", e.message, e)
                 }
                 ConnectionState.connectingStatus = R.string.cs_waiting_client
             }
         }
+    }
+
+    private fun initActionAllowlist() {
+        val sp = getSharedPreferences("uzayan_allow_list", Context.MODE_PRIVATE)
+        setActionAllowList(AllowListManager(sp).getAllowList())
     }
 
     private fun setActionAllowList(allowList: AllowList) {
