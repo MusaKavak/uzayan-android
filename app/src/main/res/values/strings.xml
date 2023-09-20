@@ -24,4 +24,8 @@
     <string name="send_command">Send Commands</string>
     <string name="title_activity_screen_cast">Screen Cast Activity</string>
     <string name="screencast">Screencast</string>
+    <string name="screen">Screen</string>
+    <string name="refresh">Refresh</string>
+    <string name="width">Width</string>
+    <string name="height">Height</string>
 </resources>

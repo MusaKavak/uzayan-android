@@ -66,7 +66,7 @@ class MainActivity : ComponentActivity() {
                             }
 
                             "screencast" -> {
-                                ScreenCastLauncher()
+                                ScreenCastLauncher(padding)
                             }
                         }
                     }

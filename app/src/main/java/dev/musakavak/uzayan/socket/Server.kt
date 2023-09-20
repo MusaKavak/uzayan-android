@@ -1,6 +1,7 @@
 package dev.musakavak.uzayan.socket
 
 import android.util.Log
+import dev.musakavak.uzayan.models.Screen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -93,17 +94,8 @@ class Server(private val actions: Actions) {
                 "FileSystemRequest" -> actions.fileSystemRequest(json)
                 "DeleteFileRequest" -> actions.deleteFileRequest(json)
                 "MoveFileRequest" -> actions.moveFileRequest(json)
-                "RemoteCommands" -> {
-                    val commandsList = json.getJSONObject("input").getJSONArray("commands")
-                    val commands = mutableListOf<String>()
-                    for (i in 0 until commandsList.length()) {
-                        val name = commandsList.getString(i)
-                        commands.add(name)
-                        println(name)
-                    }
-                    ConnectionState.remoteCommands = commands
-                }
-
+                "RemoteCommands" -> setCommands(json)
+                "ScreenInfo" -> setScreens(json)
                 "DeviceInfo" -> {
                     ConnectionState.connectedClientName =
                         json.getJSONObject("input").getString("name")
@@ -133,6 +125,32 @@ class Server(private val actions: Actions) {
             if (it.isNotEmpty() && it != "***DONE***")
                 action(it, inS, outS)
         }
+    }
+
+    private fun setCommands(json: JSONObject) {
+        val commandsList = json.getJSONObject("input").getJSONArray("commands")
+        val commands = mutableListOf<String>()
+        for (i in 0 until commandsList.length()) {
+            val name = commandsList.getString(i)
+            commands.add(name)
+        }
+        ConnectionState.remoteCommands = commands
+    }
+
+    private fun setScreens(json: JSONObject) {
+        val screensList = json.getJSONObject("input").getJSONArray("screens")
+        val screens = mutableListOf<Screen>()
+        for (i in 0 until screensList.length()) {
+            val screen = screensList.getJSONObject(i)
+            screens.add(
+                Screen(
+                    screen.getString("name"),
+                    screen.getString("width"),
+                    screen.getString("height")
+                )
+            )
+        }
+        ConnectionState.screens = screens
     }
 
     fun close() {
