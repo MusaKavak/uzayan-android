@@ -43,10 +43,11 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".services.UzayanForegroundService" />
+        <service android:name=".services.UzayanForegroundService" android:foregroundServiceType="dataSync"/>
         <service
             android:name=".services.NLService"
             android:exported="false"
+            android:foregroundServiceType="dataSync"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
             <intent-filter>
                 <action android:name="android.service.notification.NotificationListenerService" />
