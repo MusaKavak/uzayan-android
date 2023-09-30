@@ -28,4 +28,11 @@
     <string name="refresh">Refresh</string>
     <string name="width">Width</string>
     <string name="height">Height</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="unsupported">Unsupported</string>
+    <string name="permission_notification_title">Notification Access</string>
+    <string name="permission_notification_text">With this permission, you can see and control your notifications and playing medias.</string>
+    <string name="permission_storage_title">Storage Access</string>
+    <string name="permission_storage_text">With this permission, you can transfer files between your devices.</string>
 </resources>
