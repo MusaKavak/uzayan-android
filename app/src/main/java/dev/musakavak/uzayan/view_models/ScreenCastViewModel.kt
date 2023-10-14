@@ -15,8 +15,8 @@ import java.net.DatagramSocket
 
 @UnstableApi
 class ScreenCastViewModel : ViewModel() {
-    private var isInitiated = false
     private var isPlaying = false
+    var isInitiated = false
     var exoPlayer by mutableStateOf<ExoPlayer?>(null)
 
     fun init(context: Context) {
@@ -37,6 +37,7 @@ class ScreenCastViewModel : ViewModel() {
 
     fun start(screenName: String, width: String, height: String, x: String, y: String) {
         if (isPlaying) return
+        isPlaying = true
         val udp = DatagramSocket()
         val port = udp.localPort
         udp.close()
@@ -46,10 +47,9 @@ class ScreenCastViewModel : ViewModel() {
         exoPlayer?.setMediaItem(mediaItem)
         exoPlayer?.prepare()
         exoPlayer?.play()
-        isPlaying = true
 
         Emitter.emit(
-            "Screencast", ScreencastConfig(
+            "StartScreencast", ScreencastConfig(
                 screenName,
                 width,
                 height,
@@ -60,8 +60,15 @@ class ScreenCastViewModel : ViewModel() {
         )
     }
 
+    fun stop() {
+        exoPlayer?.stop()
+        Emitter.emit("StopScreencast", null)
+        isPlaying = false
+    }
+
     override fun onCleared() {
         exoPlayer?.release()
         super.onCleared()
     }
+
 }

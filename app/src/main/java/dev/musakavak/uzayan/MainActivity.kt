@@ -5,19 +5,19 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetScaffold
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.mutableStateOf
@@ -26,6 +26,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowCompat
 import dev.musakavak.uzayan.components.AllowListColumn
 import dev.musakavak.uzayan.components.ConnectionStateCard
 import dev.musakavak.uzayan.components.RemoteCommandsCard
@@ -44,6 +45,8 @@ class MainActivity : ComponentActivity() {
 
         readUriAndStartService()
 
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
         val padding = 16.dp
         setContent {
             val bottomSheetState = rememberModalBottomSheetState()
@@ -59,6 +62,9 @@ class MainActivity : ComponentActivity() {
 
             UzayanTheme {
                 BottomSheetScaffold(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.surface),
                     scaffoldState = scaffoldState,
                     sheetContainerColor = MaterialTheme.colorScheme.surface,
                     sheetPeekHeight = 0.dp,
@@ -74,20 +80,17 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 ) {
-                    Surface(
+                    Column(
                         modifier = Modifier
-                            .fillMaxSize()
-                            .padding(padding)
+                            .verticalScroll(rememberScrollState())
+                            .windowInsetsPadding(WindowInsets.safeDrawing)
+                            .padding(padding),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Column(
-                            modifier = Modifier.verticalScroll(rememberScrollState()),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            ConnectionStateCard(padding, ::startService, setSheetContent)
-                            Spacer(Modifier.padding(padding))
-                            val sp = getSharedPreferences("uzayan_allow_list", Context.MODE_PRIVATE)
-                            AllowListColumn(padding, AllowListManager(sp))
-                        }
+                        ConnectionStateCard(padding, ::startService, setSheetContent)
+                        Spacer(Modifier.padding(padding))
+                        val sp = getSharedPreferences("uzayan_allow_list", Context.MODE_PRIVATE)
+                        AllowListColumn(padding, AllowListManager(sp))
                     }
                 }
             }

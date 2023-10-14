@@ -2,4 +2,5 @@
 <resources>
     <color name="icon_tint_connected">#2fd37d</color>
     <color name="icon_tint_disconnected">#D32F2F</color>
+    <color name="transparent">#00000000</color>
 </resources>
