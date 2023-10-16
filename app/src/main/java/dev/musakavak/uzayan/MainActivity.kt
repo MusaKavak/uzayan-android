@@ -2,6 +2,7 @@ package dev.musakavak.uzayan
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -43,7 +44,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        readUriAndStartService()
+        intent.data?.let { startServiceFromUri(it) }
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
@@ -87,7 +88,12 @@ class MainActivity : ComponentActivity() {
                             .padding(padding),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        ConnectionStateCard(padding, ::startService, setSheetContent)
+                        ConnectionStateCard(
+                            padding,
+                            ::startService,
+                            ::startServiceFromUri,
+                            setSheetContent
+                        )
                         Spacer(Modifier.padding(padding))
                         val sp = getSharedPreferences("uzayan_allow_list", Context.MODE_PRIVATE)
                         AllowListColumn(padding, AllowListManager(sp))
@@ -97,15 +103,13 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun readUriAndStartService() {
-        intent.data?.let {
-            val ip = it.getQueryParameter("ip")
-            val port = it.getQueryParameter("port")?.toIntOrNull()
-            val code = it.getQueryParameter("code")?.toIntOrNull()
-            val secure = it.getQueryParameter("secure")?.toBooleanStrictOrNull()
+    private fun startServiceFromUri(uri: Uri) {
+        val ip = uri.getQueryParameter("ip")
+        val port = uri.getQueryParameter("port")?.toIntOrNull()
+        val code = uri.getQueryParameter("code")?.toIntOrNull()
+        val secure = uri.getQueryParameter("secure")?.toBooleanStrictOrNull()
 
-            startService(ip, port, code, secure)
-        }
+        startService(ip, port, code, secure)
     }
 
     private fun startService(

@@ -22,3 +22,7 @@ fun checkNotificationAccessPermission(context: Context): Boolean {
         .getString(context.contentResolver, "enabled_notification_listeners")
         .contains(context.packageName)
 }
+
+fun checkCameraPermission(context: Context): Boolean {
+    return context.checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
+}

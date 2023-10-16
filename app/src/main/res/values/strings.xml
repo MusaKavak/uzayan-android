@@ -1,7 +1,9 @@
 <resources>
     <string name="app_name">Uzayan</string>
-    <string name="fab_scan">Scan Qr Code</string>
-    <string name="app_icon_description">App Icon</string>s
+    <string name="scan_qr_code">Scan Qr Code</string>
+    <string name="scan">Scan </string>
+    <string name="connect">Connect</string>
+    <string name="app_icon_description">App Icon</string>
     <string name="no_connection">No Connection</string>
     <string name="connected_to">Connected to:</string>
     <string name="unknown">Unknown</string>
@@ -35,4 +37,6 @@
     <string name="permission_notification_text">With this permission, you can see and control your notifications and playing medias.</string>
     <string name="permission_storage_title">Storage Access</string>
     <string name="permission_storage_text">With this permission, you can transfer files between your devices.</string>
+    <string name="invalid_qr_code">Invalid QR Code</string>
+    <string name="permission_denied">Permission Denied</string>
 </resources>

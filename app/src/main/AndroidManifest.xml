@@ -44,6 +44,11 @@
                     android:scheme="http" />
             </intent-filter>
         </activity>
+        <activity
+            android:name="com.journeyapps.barcodescanner.CaptureActivity"
+            android:screenOrientation="fullSensor"
+            tools:replace="android:screenOrientation"
+            android:hardwareAccelerated="true" />
 
         <service
             android:name=".services.UzayanForegroundService"

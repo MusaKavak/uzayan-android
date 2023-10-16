@@ -84,4 +84,7 @@ dependencies {
     implementation("androidx.media3:media3-common:$media3Version")
     implementation("androidx.media3:media3-exoplayer:$media3Version")
     implementation("androidx.media3:media3-ui:$media3Version")
+
+    // https://mvnrepository.com/artifact/com.journeyapps/zxing-android-embedded
+    implementation("com.journeyapps:zxing-android-embedded:4.3.0")
 }

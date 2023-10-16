@@ -1,5 +1,6 @@
 package dev.musakavak.uzayan.components
 
+import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -25,6 +26,7 @@ import dev.musakavak.uzayan.socket.ConnectionState
 fun ConnectionStateCard(
     padding: Dp,
     startService: (String?, Int?, Int?, Boolean?) -> Unit,
+    startServiceFromUri: (Uri) -> Unit,
     setSheetContent: (String) -> Unit
 ) {
     Card(
@@ -38,7 +40,7 @@ fun ConnectionStateCard(
                 .padding(padding),
         ) {
             when (ConnectionState.currentStatus) {
-                200 -> ManualPairCard(startService)
+                200 -> ManualPairCard(startService, startServiceFromUri)
                 201 -> ConnectingStatus(padding)
                 202 -> ConnectedDeviceCard(padding, setSheetContent)
             }
