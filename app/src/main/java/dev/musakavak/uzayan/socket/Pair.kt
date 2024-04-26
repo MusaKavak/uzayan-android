@@ -5,9 +5,11 @@ import dev.musakavak.uzayan.models.NetworkMessage
 import dev.musakavak.uzayan.models.PairObject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.PrintWriter
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
+import java.net.Socket
 
 suspend fun sendPairRequest(
     ip: String,
@@ -16,22 +18,13 @@ suspend fun sendPairRequest(
     pairCode: Int,
     name: String
 ) = withContext(Dispatchers.IO) {
+        val socket = Socket(ip,destinationPort)
+        val payload = PairObject(localPort, pairCode, name)
+        val pairObject = NetworkMessage("Pair", payload)
 
-    val socket = DatagramSocket()
+        val writer = PrintWriter(socket.getOutputStream())
+        writer.println(Gson().toJson(pairObject))
 
-    val payload = PairObject(localPort, pairCode, name)
-
-    val pairObject = NetworkMessage("Pair", payload)
-    val buf = Gson().toJson(pairObject).toByteArray()
-    val address = InetAddress.getByName(ip)
-
-    val packet = DatagramPacket(
-        buf,
-        buf.size,
-        address,
-        destinationPort
-    )
-
-    socket.send(packet)
+        writer.flush()
 }
 
