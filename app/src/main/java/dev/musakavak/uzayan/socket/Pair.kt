@@ -22,9 +22,8 @@ suspend fun sendPairRequest(
         val payload = PairObject(localPort, pairCode, name)
         val pairObject = NetworkMessage("Pair", payload)
 
-        val writer = PrintWriter(socket.getOutputStream())
-        writer.println(Gson().toJson(pairObject))
-
-        writer.flush()
+        val out = socket.getOutputStream()
+        out.write(Gson().toJson(pairObject).toByteArray())
+        out.flush()
 }
 

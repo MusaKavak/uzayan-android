@@ -34,6 +34,7 @@ import dev.musakavak.uzayan.components.RemoteCommandsCard
 import dev.musakavak.uzayan.components.ScreenCastLauncher
 import dev.musakavak.uzayan.managers.AllowListManager
 import dev.musakavak.uzayan.services.UzayanForegroundService
+import dev.musakavak.uzayan.socket.ConnectionState
 import dev.musakavak.uzayan.ui.theme.UzayanTheme
 import kotlinx.coroutines.launch
 
@@ -91,6 +92,7 @@ class MainActivity : ComponentActivity() {
                         ConnectionStateCard(
                             padding,
                             ::startService,
+                            ::closeConnection,
                             ::startServiceFromUri,
                             setSheetContent
                         )
@@ -130,6 +132,11 @@ class MainActivity : ComponentActivity() {
 
             startForegroundService(intent)
         }
+    }
+
+    private fun closeConnection(){
+        stopService(Intent(this, UzayanForegroundService::class.java))
+        ConnectionState.setDefault()
     }
 }
 

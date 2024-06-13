@@ -13,5 +13,14 @@ class ConnectionState {
         var connectingStatus by mutableStateOf<Int?>(null)
         var remoteCommands by mutableStateOf<List<String>?>(null)
         var screens by mutableStateOf<List<Screen>?>(null)
+
+        fun setDefault(){
+            currentStatus = 200
+            connectedClientName = null
+            isConnectionSecure = null
+            connectingStatus = null
+            remoteCommands = null
+            screens = null
+        }
     }
 }

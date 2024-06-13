@@ -18,6 +18,7 @@ class Server(private val actions: Actions) {
     private var server: ServerSocket? = null
     val port get() = server?.localPort
     private val scope = CoroutineScope(Dispatchers.IO)
+    private val activeSockets = mutableListOf<Socket>()
 
     fun initialize(secureConnection: Boolean) {
         println("Creating Server")
@@ -33,13 +34,18 @@ class Server(private val actions: Actions) {
             if (server == null) return@launch
             while (!server!!.isClosed) {
                 Log.w("Sockett Simple", "Listening for new client")
-                val socket = server!!.accept()
-                scope.launch {
-                    val address = "${socket?.inetAddress?.hostName}:${socket.port}"
-                    Log.w("Sockett Simple", "New Tcp Socket Connection From: $address")
-                    handleConnection(socket)
-                    Log.w("Sockett Simple", "Tcp Socket From: $address Is Disconnected")
-                }
+                try {
+                    val socket = server!!.accept()
+                    synchronized(activeSockets) {
+                        activeSockets.add(socket)
+                    }
+                    scope.launch {
+                        val address = "${socket?.inetAddress?.hostName}:${socket.port}"
+                        Log.w("Sockett Simple", "New Tcp Socket Connection From: $address")
+                        handleConnection(socket)
+                        Log.w("Sockett Simple", "Tcp Socket From: $address Is Disconnected")
+                    }
+                }catch (_:Exception){}
             }
         }
     }
@@ -154,6 +160,17 @@ class Server(private val actions: Actions) {
     }
 
     fun close() {
+        synchronized(activeSockets) {
+            activeSockets.forEach { socket ->
+                try {
+                    socket.close()
+                } catch (e: Exception) {
+                    Log.e("Sockett Simple", "Error closing socket: ${e.message}")
+                }
+            }
+            activeSockets.clear()
+        }
+
         scope.cancel()
         server?.close()
     }

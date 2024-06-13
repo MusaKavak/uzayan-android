@@ -39,4 +39,5 @@
     <string name="permission_storage_text">With this permission, you can transfer files between your devices.</string>
     <string name="invalid_qr_code">Invalid QR Code</string>
     <string name="permission_denied">Permission Denied</string>
+    <string name="close">Close</string>
 </resources>
